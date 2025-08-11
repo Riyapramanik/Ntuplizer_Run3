@@ -1,0 +1,29 @@
+<library name="ggNtuplizer">
+  <use name="rootrflx"/>
+  <use name="FWCore/Framework"/>
+  <use name="FWCore/ParameterSet"/>
+  <use name="FWCore/MessageLogger"/>
+  <use name="FWCore/Common"/>
+  <use name="DataFormats/PatCandidates"/>
+  <use name="DataFormats/VertexReco"/>
+  <use name="DataFormats/JetReco"/>
+  <use name="DataFormats/TrackReco"/>
+  <use name="DataFormats/EgammaCandidates"/>
+  <use name="DataFormats/Common"/>
+  <use name="SimDataFormats/GeneratorProducts"/>
+  <use name="SimDataFormats/PileupSummaryInfo"/>
+  <use name="SimDataFormats/JetMatching"/>
+  <use name="SimDataFormats/Tracks"/>
+  <use name="SimDataFormats/Vertex"/>
+  <use name="rootcore"/>
+  <use name="clhep"/>
+
+  <flags ROOTMAP="yes"/>
+  <flags LCG_DICT_HEADER="classes.h"/>
+  <flags LCG_DICT_XML="classes_def.xml"/>
+
+  <src file="ggNtuplizer.cc"/>
+  <src file="JetIDTools.cc"/>
+</library>
+
+

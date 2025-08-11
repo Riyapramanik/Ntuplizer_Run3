@@ -1,0 +1,442 @@
+import FWCore.ParameterSet.Config as cms
+import os, sys
+import argparse
+
+#ARGUMENT PARSING when running the script
+
+argParser = argparse.ArgumentParser(description = "ggNtuplizer Run 3 Configuration")
+argParser.add_argument('--year',     default='2022',     type=str, help="Data year: 2022, 2022EE, 2023, 2023BPiX, 2024")
+argParser.add_argument('--era',      default='C',        type=str, help="Data era (C, D, E, F, G, etc.)")
+argParser.add_argument('--isData',   action='store_true',          help="Process data (default: MC)")
+argParser.add_argument('--maxEvents', default=100,       type=int, help="Maximum events to process")
+argParser.add_argument('--inputFiles', nargs='+',                  help="Input files")
+args = argParser.parse_args()
+
+# Create the main CMSSW process
+process = cms.Process('ggNtuplizer')
+
+process.load("FWCore.MessageLogger.MessageLogger_cfi")
+process.MessageLogger.cerr.FwkReport.reportEvery = 100
+
+#==============================
+#GLOBAL CONDITIONS AND SERVICES
+#==============================
+process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
+process.load('Configuration.StandardSequences.Services_cff')
+process.load("Configuration.EventContent.EventContent_cff")
+process.load('Configuration.StandardSequences.GeometryRecoDB_cff')
+process.load('Configuration.StandardSequences.MagneticField_cff')
+
+# Jet reconstruction sequences - needed for jet energy corrections
+process.load('RecoJets.Configuration.GenJetParticles_cff')
+process.load('RecoJets.Configuration.RecoGenJets_cff')
+process.load('RecoJets.JetProducers.TrackJetParameters_cfi')
+process.load('RecoJets.JetProducers.PileupJetIDParams_cfi')
+
+# PAT (Physics Analysis Toolkit) - provides high-level physics objects
+process.load("PhysicsTools.PatAlgos.producersLayer1.patCandidates_cff")
+process.load("PhysicsTools.PatAlgos.selectionLayer1.selectedPatCandidates_cff")
+
+#Global Tag
+from Configuration.AlCa.GlobalTag import GlobalTag
+
+IsDATA = args.isData
+YEAR = args.year
+ERA = args.era
+
+if IsDATA:
+    if YEAR == "2022":
+        process.GlobalTag = GlobalTag(process.GlobalTag, '130X_dataRun3_v2')
+        JEC_tag = "Summer22_22Sep2023_RunCD_V2_DATA"
+        JER_tag = 'Summer22_22Sep2023_JRV1_MC'
+        JetVeto_tag = 'Summer22_23Sep2023_RunCD_v1'
+    elif YEAR == "2022EE":
+        process.GlobalTag = GlobalTag(process.GlobalTag, '130X_dataRun3_PromptAnalysis_v1')
+        JEC_tag = f"Summer22EE_22Sep2023_Run{ERA}_V2_DATA"
+        JER_tag = 'Summer22EE_22Sep2023_JRV1_MC'
+        JetVeto_tag = 'Summer22EE_23Sep2023_RunEFG_v1'
+    elif YEAR == "2023":
+        process.GlobalTag = GlobalTag(process.GlobalTag, '130X_dataRun3_PromptAnalysis_v1')
+        if ERA == "Cv4":
+            JEC_tag = "Summer23Prompt23_RunCv4_V1_DATA"
+        else:
+            JEC_tag = "Summer23Prompt23_RunCv123_V1_DATA"
+        JER_tag = 'Summer23Prompt23_RunCv123_JRV1_MC'
+        JetVeto_tag = "Summer23Prompt23_RunC_v1"
+    elif YEAR == "2023BPiX":
+        process.GlobalTag = GlobalTag(process.GlobalTag, '130X_dataRun3_PromptAnalysis_v1')
+        JEC_tag = "Summer23BPixPrompt23_RunD_V1_DATA"
+        JER_tag = 'Summer23BPixPrompt23_RunD_JRV1_MC'
+        JetVeto_tag = "Summer23BPixPrompt23_RunD_v1"
+    elif YEAR == "2024":
+        process.GlobalTag = GlobalTag(process.GlobalTag, '150X_dataRun3_v2')
+        JEC_tag = f"Summer24Prompt24_Run{ERA}nib1_V1_DATA"
+        JER_tag = 'Winter24Prompt24'
+        JetVeto_tag = "Summer24Prompt24_RunBCDEFGHI"
+else:  # MC
+    if YEAR == "2022":
+        process.GlobalTag = GlobalTag(process.GlobalTag, '130X_mcRun3_2022_realistic_v5')
+        JEC_tag = 'Summer22_22Sep2023_V2_MC'
+        JER_tag = 'Summer22_22Sep2023_JRV1_MC'
+        JetVeto_tag = 'Summer22_23Sep2023_RunCD_v1'
+    elif YEAR == "2022EE":
+        process.GlobalTag = GlobalTag(process.GlobalTag, '130X_mcRun3_2022_realistic_postEE_v6')
+        JEC_tag = 'Summer22EE_22Sep2023_V2_MC'
+        JER_tag = 'Summer22EE_22Sep2023_JRV1_MC'
+        JetVeto_tag = 'Summer22EE_23Sep2023_RunEFG_v1'
+    elif YEAR == "2023":
+        process.GlobalTag = GlobalTag(process.GlobalTag, '130X_mcRun3_2023_realistic_v14')
+        JEC_tag = "Summer23Prompt23_V1_MC"
+        if ERA == "Cv4":
+            JER_tag = 'Summer23Prompt23_RunCv4_JRV1_MC'
+        else:
+            JER_tag = 'Summer23Prompt23_RunCv123_JRV1_MC'
+        JetVeto_tag = "Summer23Prompt23_RunC_v1"
+    elif YEAR == "2023BPiX":
+        process.GlobalTag = GlobalTag(process.GlobalTag, '130X_mcRun3_2023_realistic_postBPix_v2')
+        JEC_tag = "Summer23BPixPrompt23_V1_MC"
+        JER_tag = 'Summer23BPixPrompt23_RunD_JRV1_MC'
+        JetVeto_tag = "Summer23BPixPrompt23_RunD_v1"
+    elif YEAR == "2024":
+        process.GlobalTag = GlobalTag(process.GlobalTag, '150X_mcRun3_2024_realistic_v2')
+        JEC_tag = "Summer24Prompt24_V1_MC"
+        JER_tag = 'Summer23BPixPrompt23_RunD_JRV1_MC'
+        JetVeto_tag = "Summer24Prompt24_RunBCDEFGHI"
+
+
+print(f"Configuration: YEAR={YEAR}, ERA={ERA}, IsData={IsDATA}")
+print(f"JEC tag: {JEC_tag}")
+print(f"JER tag: {JER_tag}")
+print(f"Global tag: {process.GlobalTag.globaltag}")
+
+# INPUT FILES AND EVENT SETTINGS
+# ========================================================================
+# Set maximum number of events to process
+process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(args.maxEvents))
+
+# Define input files - you can override with command line arguments
+default_files = [
+    'root://cms-xrd-global.cern.ch//store/data/Run2022C/EGamma/MINIAOD/22Sep2023-v1/2550000/00c0b0ec-514a-4b7d-9b30-bd3026668a24.root'
+] if IsDATA else [
+    'root://cms-xrd-global.cern.ch//store/mc/Run3Summer22MiniAODv4/TTto2L2Nu_TuneCP5_13p6TeV_powheg-pythia8/MINIAODSIM/130X_mcRun3_2022_realistic_v5-v2/2530000/e319e433-9397-4985-aa9e-a30d46e29f24.root'
+]
+
+input_files = args.inputFiles if args.inputFiles else default_files
+
+process.source = cms.Source("PoolSource",
+                            fileNames = cms.untracked.vstring(input_files)
+                            )
+
+
+# OUTPUT FILE SERVICE
+# ========================================================================
+# TFileService creates the output ROOT file for your ntuples
+process.TFileService = cms.Service("TFileService",
+                                   fileName = cms.string(f'ggNtuplizer_{YEAR}_{ERA}_{"data" if IsDATA else "mc"}.root')
+                                   )
+
+
+# ========================================================================
+# ELECTRON AND PHOTON ID SETUP
+# ========================================================================
+# VID (Versioned ID) is needed for electron and photon identification
+from PhysicsTools.SelectorUtils.tools.vid_id_tools import *
+
+# Switch on VID producers for electrons and photons
+dataFormat = DataFormat.MiniAOD
+switchOnVIDPhotonIdProducer(process, dataFormat)
+switchOnVIDElectronIdProducer(process, dataFormat)
+
+# Define which ID modules to load - these contain the cut definitions
+id_modules = [
+    # Photon IDs
+    'RecoEgamma.PhotonIdentification.Identification.cutBasedPhotonID_RunIIIWinter22_122X_V1_cff',
+    'RecoEgamma.PhotonIdentification.Identification.mvaPhotonID_Winter22_122X_V1_cff',
+    # Electron IDs  
+    'RecoEgamma.ElectronIdentification.Identification.mvaElectronID_RunIIIWinter22_iso_V1_cff',
+    'RecoEgamma.ElectronIdentification.Identification.mvaElectronID_RunIIIWinter22_noIso_V1_cff',
+    'RecoEgamma.ElectronIdentification.Identification.cutBasedElectronID_Winter22_122X_V1_cff'
+]
+
+# Set up all the ID modules
+for idmod in id_modules:
+    setupAllVIDIdsInModule(process, idmod, setupVIDElectronSelection)
+    setupAllVIDIdsInModule(process, idmod, setupVIDPhotonSelection)
+    
+    
+    
+#JET ENERGY CORRECTIONS (JEC) SETUP
+# ========================================================================
+# JEC corrects raw jet energies to account for detector response
+# Different correction levels: L1 (pileup), L2 (relative), L3 (absolute), L2L3Residual (data only)
+
+# Define JEC correction levels
+jec_levels = ['L1FastJet', 'L2Relative', 'L3Absolute']
+if IsDATA:
+    jec_levels.append('L2L3Residual')  # Additional residual corrections for data
+    
+# JEC from database (external files)
+# Note: You'll need to download the JEC files and place them in JECfiles/ directory
+jecDBFile = f"JECfiles/SQLite/{JEC_tag}.db"
+if os.path.exists(jecDBFile):
+    from CondCore.DBCommon.CondDBSetup_cfi import CondDBSetup
+    
+    process.jec = cms.ESSource('PoolDBESSource',
+                               CondDBSetup,
+                               connect = cms.string(f'sqlite_file:{jecDBFile}'),
+                               toGet = cms.VPSet(
+                                   cms.PSet(
+                                       record = cms.string('JetCorrectionsRecord'),
+                                       tag    = cms.string(f"JetCorrectorParametersCollection_{JEC_tag}_AK4PFPuppi"),
+                                       label  = cms.untracked.string('AK4PFPuppi')
+                                   ),
+                               )
+                               )
+    process.es_prefer_jec = cms.ESPrefer('PoolDBESSource', 'jec')
+    print(f"Using JEC from database: {jecDBFile}")
+else:
+    print(f"Warning: JEC database file not found: {jecDBFile}")
+    print("Will use JEC from Global Tag")
+    
+    
+
+#JET UPDATES AND CORRECTIONS
+# ========================================================================
+# Import updateJetCollection - this is the key function that creates updated jet collections
+from PhysicsTools.PatAlgos.tools.jetTools import updateJetCollection
+
+# Import b-tagging discriminators for ParticleNet
+from RecoBTag.ONNXRuntime.pfParticleNetFromMiniAODAK4_cff import _pfParticleNetFromMiniAODAK4PuppiCentralJetTagsAll as pfParticleNetFromMiniAODAK4PuppiCentralJetTagsAll
+from RecoBTag.ONNXRuntime.pfParticleNetFromMiniAODAK4_cff import _pfParticleNetFromMiniAODAK4PuppiForwardJetTagsAll as pfParticleNetFromMiniAODAK4PuppiForwardJetTagsAll
+from RecoBTag.ONNXRuntime.pfParticleNetAK4_cff import _pfParticleNetAK4JetTagsAll as pfParticleNetAK4JetTagsAll
+
+# Combine all ParticleNet discriminators
+pnetDiscriminators = []
+pnetDiscriminators += pfParticleNetFromMiniAODAK4PuppiCentralJetTagsAll
+pnetDiscriminators += pfParticleNetFromMiniAODAK4PuppiForwardJetTagsAll
+pnetDiscriminators += pfParticleNetAK4JetTagsAll
+
+# Add QG likelihood and pileup jet ID first
+from RecoJets.JetProducers.QGTagger_cfi import QGTagger
+process.qgtagger = QGTagger.clone(
+    srcJets = cms.InputTag("slimmedJetsPuppi"),
+    srcVertexCollection = "offlineSlimmedPrimaryVertices"
+)
+
+from RecoJets.JetProducers.PileupJetID_cfi import pileupJetId
+process.pileupJetID = pileupJetId.clone(
+    jets = cms.InputTag('slimmedJetsPuppi'),
+    inputIsCorrected = False,
+    applyJec = False,
+    vertexes = cms.InputTag("offlineSlimmedPrimaryVertices"),
+)
+
+# Create jets with QG and PUID info
+process.slimmedJetsPuppiWithInfo = cms.EDProducer("PATJetUserDataEmbedder",
+                                                  src = cms.InputTag("slimmedJetsPuppi"),
+                                                  userFloats = cms.PSet(
+                                                      qgLikelihood = cms.InputTag('qgtagger:qgLikelihood'),
+                                                      pileupJetId_fullDiscriminant = cms.InputTag('pileupJetID:fullDiscriminant'),
+                                                  )
+                                                  )
+
+# Update AK4 jets with PNet scores and corrections
+# IMPORTANT: This creates the jet collection, but my ggNtuplizer will:
+# 1. Read this collection 
+# 2. Extract UNCORRECTED jets using ak4jet.correctedP4("Uncorrected")
+# 3. Apply its own manual JEC corrections for full control
+updateJetCollection(
+    process,
+    jetSource = cms.InputTag('slimmedJetsPuppiWithInfo'),  # Input: jets with QG/PUID
+    pvSource = cms.InputTag('offlineSlimmedPrimaryVertices'),
+    svSource = cms.InputTag('slimmedSecondaryVertices'),
+    jetCorrections = ('AK4PFPuppi', jec_levels, 'None'),  # Framework JEC (ignored by ggNtuplizer)
+    btagDiscriminators = pnetDiscriminators,               # ParticleNet b-tagging (used by ggNtuplizer)
+    postfix = 'WithPNetInfo'  # Creates: selectedUpdatedPatJetsWithPNetInfo
+)
+
+
+# ========================================================================
+# MET CORRECTIONS
+# ========================================================================
+# MET needs to be recalculated when jets are corrected
+from PhysicsTools.PatUtils.tools.runMETCorrectionsAndUncertainties import runMetCorAndUncFromMiniAOD
+
+# CHS MET corrections
+runMetCorAndUncFromMiniAOD(
+    process,
+    isData = IsDATA,
+    postfix = "Updated"
+)
+
+# PUPPI MET corrections  
+from PhysicsTools.PatAlgos.slimming.puppiForMET_cff import makePuppiesFromMiniAOD
+makePuppiesFromMiniAOD(process, True)
+
+runMetCorAndUncFromMiniAOD(
+    process,
+    isData = IsDATA,
+    metType = "Puppi",
+    postfix = "Puppi",
+    jetFlavor = "AK4PFPuppi"
+)
+
+
+# ========================================================================
+# GGNTUPLIZER CONFIGURATION
+# ========================================================================
+# Load  ggNtuplizer configuration
+process.load("ggAnalysis.ggNtuplizer.ggNtuplizer_miniAOD_cfi")
+
+# Configure ggNtuplizer parameters
+process.ggNtuplizer.year = cms.int32(int(YEAR.replace('BPiX', '').replace('EE', '')))
+process.ggNtuplizer.isData = cms.bool(IsDATA)
+process.ggNtuplizer.isMC = cms.bool(not IsDATA)
+process.ggNtuplizer.isRun3 = cms.untracked.bool(True)
+process.ggNtuplizer.isUltraLegacy = cms.untracked.bool(False)
+process.ggNtuplizer.YEAR = cms.untracked.string(YEAR)  # String version for ggNtuplizer
+process.ggNtuplizer.Data = cms.untracked.bool(IsDATA)
+process.ggNtuplizer.MonteCarlo = cms.untracked.bool(not IsDATA)
+
+# Data/MC specific settings
+process.ggNtuplizer.doGenParticles = cms.bool(not IsDATA)  # Only for MC
+process.ggNtuplizer.runOnParticleGun = cms.bool(False)
+process.ggNtuplizer.runOnSherpa = cms.bool(False)
+
+# Input collections - updated for Run 3
+process.ggNtuplizer.VtxLabel = cms.InputTag("offlineSlimmedPrimaryVertices")
+process.ggNtuplizer.rhoLabel = cms.InputTag("fixedGridRhoFastjetAll")
+process.ggNtuplizer.PFRho = cms.InputTag("fixedGridRhoFastjetAll")
+
+# Lepton collections
+process.ggNtuplizer.electronSrc = cms.InputTag("slimmedElectrons")
+process.ggNtuplizer.photonSrc = cms.InputTag("slimmedPhotons")
+process.ggNtuplizer.muonSrc = cms.InputTag("slimmedMuons")
+process.ggNtuplizer.Muons = cms.InputTag("slimmedMuons")
+
+# Jet collections - use updated collections with PNet info
+process.ggNtuplizer.PFJetsAK4 = cms.InputTag("selectedUpdatedPatJetsWithPNetInfo")
+process.ggNtuplizer.tok_pfjetAK4s_ = cms.InputTag("selectedUpdatedPatJetsWithPNetInfo")
+process.ggNtuplizer.GENJetAK4 = cms.InputTag("slimmedGenJets")
+process.ggNtuplizer.genParticleSrc = cms.InputTag("prunedGenParticles")
+process.ggNtuplizer.generatorLabel = cms.InputTag("generator")
+process.ggNtuplizer.LHEEventLabel = cms.InputTag("externalLHEProducer")
+process.ggNtuplizer.pileupCollection = cms.InputTag("slimmedAddPileupInfo")
+
+# MET collections - use updated MET
+process.ggNtuplizer.PFMet = cms.InputTag("slimmedMETsUpdated")
+process.ggNtuplizer.PuppiMet = cms.InputTag("slimmedMETsPuppi")
+
+
+# Gen collections (MC only)
+if not IsDATA:
+    process.ggNtuplizer.GENJetAK4 = cms.InputTag("slimmedGenJets")
+    process.ggNtuplizer.genParticleSrc = cms.InputTag("prunedGenParticles")
+    process.ggNtuplizer.generatorLabel = cms.InputTag("generator")
+    process.ggNtuplizer.LHEEventLabel = cms.InputTag("externalLHEProducer")
+    process.ggNtuplizer.pileupCollection = cms.InputTag("slimmedAddPileupInfo")
+    
+# ECAL RecHits for energy corrections
+process.ggNtuplizer.reducedEcalRecHitsEB = cms.InputTag("reducedEgamma", "reducedEBRecHits")
+process.ggNtuplizer.reducedEcalRecHitsEE = cms.InputTag("reducedEgamma", "reducedEERecHits")
+process.ggNtuplizer.reducedEcalRecHitsES = cms.InputTag("reducedEgamma", "reducedESRecHits")
+
+# Trigger information
+process.ggNtuplizer.bits = cms.InputTag("TriggerResults", "", "HLT")
+process.ggNtuplizer.TriggerObjects = cms.InputTag("slimmedPatTrigger")
+process.ggNtuplizer.prescales = cms.InputTag("patTrigger", "", "RECO")
+
+# MET filters
+process.ggNtuplizer.MET_Filters = cms.InputTag("TriggerResults", "", "RECO")
+
+
+# File paths for JEC/JER (used by ggNtuplizer's manual correction system)
+# Note: Even though framework applies JEC, ggNtuplizer reads uncorrected jets and applies own corrections
+jec_base_path = f"JECfiles/{JEC_tag}/"
+jer_base_path = f"JERfiles/{JER_tag}/"
+
+
+# JEC correction files (for manual application in ggNtuplizer)
+process.ggNtuplizer.jecL1FastFileAK4 = cms.string(f"{jec_base_path}{JEC_tag}_L1FastJet_AK4PFPuppi.txt")
+process.ggNtuplizer.jecL2RelativeFileAK4 = cms.string(f"{jec_base_path}{JEC_tag}_L2Relative_AK4PFPuppi.txt")
+process.ggNtuplizer.jecL3AbsoluteFileAK4 = cms.string(f"{jec_base_path}{JEC_tag}_L3Absolute_AK4PFPuppi.txt")
+if IsDATA:
+    process.ggNtuplizer.jecL2L3ResidualFileAK4 = cms.string(f"{jec_base_path}{JEC_tag}_L2L3Residual_AK4PFPuppi.txt")
+
+# JER files (for manual application in ggNtuplizer)
+process.ggNtuplizer.PtResoFileAK4 = cms.string(f"{jer_base_path}{JER_tag}_PtResolution_AK4PFPuppi.txt")
+process.ggNtuplizer.PtSFFileAK4 = cms.string(f"{jer_base_path}{JER_tag}_SF_AK4PFPuppi.txt")
+process.ggNtuplizer.mPtResoFileAK4 = cms.string(f"{jer_base_path}{JER_tag}_PtResolution_AK4PFPuppi.txt")
+process.ggNtuplizer.mPtSFFileAK4 = cms.string(f"{jer_base_path}{JER_tag}_SF_AK4PFPuppi.txt")
+
+# JEC uncertainty file (for systematic variations in ggNtuplizer)
+# Your code uses multiple uncertainty sources in vsrc vector
+process.ggNtuplizer.JECUncFileAK4 = cms.string(f"{jec_base_path}{JEC_tag}_UncertaintySources_AK4PFPuppi.txt")
+
+# Additional JEC parameters that may be needed
+process.ggNtuplizer.ReadJEC = cms.untracked.bool(True)  # Enable JEC reading in ggNtuplizer
+
+# Jet veto map
+process.ggNtuplizer.JetVetoMap = cms.string(f'JetVetoMaps/{JetVeto_tag}.root')
+
+# Object selection cuts (used in ggNtuplizer_ak4_puppi_jets.cc)
+process.ggNtuplizer.minJetPt = cms.untracked.double(25.0)    # min_pt_AK4jet
+process.ggNtuplizer.maxEta = cms.untracked.double(3.0)       # max_eta
+process.ggNtuplizer.min_pt_AK4jet = cms.untracked.double(25.0)  # Alternative parameter name
+process.ggNtuplizer.max_eta = cms.untracked.double(3.0)         # Alternative parameter name
+
+# Storage flags - control what gets saved
+process.ggNtuplizer.store_electrons = cms.untracked.bool(True)
+process.ggNtuplizer.store_muons = cms.untracked.bool(True)
+process.ggNtuplizer.store_photons = cms.untracked.bool(True)
+process.ggNtuplizer.store_ak4jets = cms.untracked.bool(True)
+process.ggNtuplizer.store_CHS_met = cms.untracked.bool(True)
+process.ggNtuplizer.store_PUPPI_met = cms.untracked.bool(True)
+
+# Scale and smearing corrections
+process.ggNtuplizer.store_electron_scalnsmear = cms.untracked.bool(False)  # Enable if needed
+process.ggNtuplizer.store_photon_scalnsmear = cms.untracked.bool(False)   # Enable if needed
+
+# ID scale factors
+process.ggNtuplizer.store_electron_idSF = cms.untracked.bool(False)  # Enable if you have SF files
+process.ggNtuplizer.store_photon_idSF = cms.untracked.bool(False)    # Enable if you have SF files
+
+# Year-specific corrections settings
+if hasattr(process.ggNtuplizer, 'dataYear'):
+    process.ggNtuplizer.dataYear = cms.int32(int(YEAR.replace('BPiX', '').replace('EE', '')))
+if hasattr(process.ggNtuplizer, 'dataPeriod'):
+    process.ggNtuplizer.dataPeriod = cms.string(ERA)
+if hasattr(process.ggNtuplizer, 'useETDependentCorrections'):
+    process.ggNtuplizer.useETDependentCorrections = cms.bool(True)
+if hasattr(process.ggNtuplizer, 'applyEGMCorrections'):
+    process.ggNtuplizer.applyEGMCorrections = cms.bool(False)  # Set to True if you have correction files
+
+# ========================================================================
+# PROCESSING PATH
+# ========================================================================
+# Define the processing sequence - ORDER MATTERS!
+process.p = cms.Path(
+    process.egmPhotonIDSequence *                    # Photon ID sequence
+    process.egmGsfElectronIDSequence *               # Electron ID sequence
+    process.qgtagger *                               # QG likelihood calculation
+    process.pileupJetID *                            # Pileup jet ID
+    process.slimmedJetsPuppiWithInfo *               # Add QG/PUID to jets
+    process.patJetCorrFactorsWithPNetInfo *          # JEC factors for updated jets
+    process.updatedPatJetsWithPNetInfo *             # Apply JEC and add PNet
+    process.selectedUpdatedPatJetsWithPNetInfo *     # Select updated jets
+    process.ggNtuplizer                              # Your analyzer
+)
+
+# ========================================================================
+# PROCESS OPTIONS
+# ========================================================================
+# General process options
+process.options = cms.untracked.PSet(
+    wantSummary = cms.untracked.bool(True),           # Print summary at end
+    allowUnscheduled = cms.untracked.bool(True),      # Allow unscheduled execution
+    numberOfThreads = cms.untracked.uint32(1),       # Number of threads
+    numberOfStreams = cms.untracked.uint32(0)        # Number of streams
+)
+
+
+

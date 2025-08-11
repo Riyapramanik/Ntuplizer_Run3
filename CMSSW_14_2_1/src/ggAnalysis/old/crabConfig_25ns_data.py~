@@ -1,0 +1,50 @@
+from CRABClient.UserUtilities import config
+import sys
+
+config = config()
+
+
+#**************************submit function***********************
+from CRABAPI.RawCommand import crabCommand
+from CRABClient.ClientExceptions import ClientException
+#****************************************************************
+
+
+config.General.workArea     = 'crab_projects_ntuples'
+config.JobType.pluginName   = 'Analysis' # PrivateMC
+
+config.Data.inputDBS        = 'global'    
+config.Data.splitting       = 'FileBased' # EventBased, FileBased, LumiBased (1 lumi ~= 300 events)
+config.Data.totalUnits      = -1
+config.Data.publication     = False
+#config.Site.storageSite     = 'T2_CH_CERN'
+#config.Site.storageSite = 'T2_IN_TIFR'
+config.Site.storageSite ='T3_CH_CERNBOX'
+
+# dataset dependent configuration
+#############G+jet samples
+config.Data.unitsPerJob    = 10
+#config.Data.outLFNDirBase  = '/store/user/shilpi/highPtPhotonID/GJetPtBin/v2'
+config.Data.outLFNDirBase ='/store/user/rpramani'
+#config.Data.outLFNDirBase ='/eos/user/r/rpramani'
+
+###
+#config.JobType.psetName     = 'run_dataAtoE2022_133X.py'
+#config.General.requestName = 'EGamma_A'
+#config.Data.inputDataset   = '/EGamma/Run2022A-22Sep2023-v1/MINIAOD'
+
+#config.General.requestName = 'EGamma_B'
+#config.Data.inputDataset   = '/EGamma/Run2022B-22Sep2023-v2/MINIAOD'
+
+#config.General.requestName = 'EGamma_C'
+#config.Data.inputDataset   = '/EGamma/Run2022C-22Sep2023-v1/MINIAOD'
+
+#config.General.requestName = 'EGamma_D'
+#config.Data.inputDataset   = '/EGamma/Run2022D-22Sep2023-v1/MINIAOD'
+
+#config.General.requestName = 'EGamma_E'
+#config.Data.inputDataset   = '/EGamma/Run2022E-22Sep2023-v1/MINIAOD'
+
+config.JobType.psetName     = 'run_dataFG2022_133X.py'                                                                                                                                                   
+#config.General.requestName = 'EGamma_F'             
+#config.Data.inputDataset   = '/EGamma/Run2022A-22Sep2023-v1/MINIAOD'
