@@ -98,7 +98,7 @@ else:
 #! Can make it as argument
 #!!!!!!!!!!!!!!
 process.GlobalTag = GlobalTag(process.GlobalTag, '130X_dataRun3_v2')
-process.maxEvents = cms.untracked.PSet(input=cms.untracked.int32(-1))
+process.maxEvents = cms.untracked.PSet(input=cms.untracked.int32(10))
 process.MessageLogger.cerr.FwkReport.reportEvery = 5000
 #process.source = cms.Source("PoolSource", fileNames = cms.untracked.vstring('/store/data/Run2022A/EGamma/MINIAOD/22Sep2023-v1/30000/19531535-6c96-4871-aa56-8cf0b9581e6d.root'))
 process.source = cms.Source("PoolSource", fileNames = cms.untracked.vstring('/store/data/Run2022C/EGamma/MINIAOD/22Sep2023-v1/50000/6015928f-0763-4e7f-9d48-ff0f2ddaf12e.root'))
@@ -194,14 +194,8 @@ runMetCorAndUncFromMiniAOD(process,
                            )
 process.puppi.useExistingWeights = True
 
-# Create a GEN collection 
-'''from RecoJets.Configuration.GenJetParticles_cff import genParticlesForJets
-process.genParticlesForJets = genParticlesForJets.clone(
-        src = cms.InputTag("packedGenParticles")
-)'''
-
 #Muon information
-from PhysicsTools.PatAlgos.producersLayer1.muonProducer_cfi import patMuons #.miniIsoParams #as _miniIsoParams
+store_electron_idSFfrom PhysicsTools.PatAlgos.producersLayer1.muonProducer_cfi import patMuons #.miniIsoParams #as _miniIsoParams
 
 process.slimmedMuonsUpdated = cms.EDProducer("PATMuonUpdater",
     src = cms.InputTag("slimmedMuons"),
@@ -309,18 +303,17 @@ process.ggNtuplizer.UltraLegacy = cms.untracked.bool(False)
 process.ggNtuplizer.isRun3 = cms.untracked.bool(True)
 process.ggNtuplizer.doGenParticles = cms.bool(False)
 process.ggNtuplizer.isData = cms.bool(True)
-process.ggNtuplizer.store_electrons = cms.untracked.bool(False)
-process.ggNtuplizer.store_muons = cms.untracked.bool(False)  
+process.ggNtuplizer.store_electrons = cms.untracked.bool(True)
+process.ggNtuplizer.store_muons = cms.untracked.bool(True)  
 process.ggNtuplizer.store_photons = cms.untracked.bool(True)  
-process.ggNtuplizer.store_ak4jets = cms.untracked.bool(False)
-process.ggNtuplizer.store_CHS_met = cms.untracked.bool(False)    
-process.ggNtuplizer.store_PUPPI_met = cms.untracked.bool(False)
-process.ggNtuplizer.store_electron_scalnsmear = cms.untracked.bool(False)
-process.ggNtuplizer.store_photon_scalnsmear = cms.untracked.bool(False)
-process.ggNtuplizer.store_electron_idSF = cms.untracked.bool(False)
-process.ggNtuplizer.store_photon_idSF = cms.untracked.bool(False)
-process.ggNtuplizer.useETDependentCorrections = cms.bool(False)
-process.ggNtuplizer.applyEGMCorrections = cms.bool(False)
+process.ggNtuplizer.store_ak4jets = cms.untracked.bool(True)
+process.ggNtuplizer.store_CHS_met = cms.untracked.bool(True)    
+process.ggNtuplizer.store_PUPPI_met = cms.untracked.bool(True)
+process.ggNtuplizer.store_electron_scalnsmear = cms.untracked.bool(True)
+process.ggNtuplizer.store_photon_scalnsmear = cms.untracked.bool(True)
+process.ggNtuplizer.store_electron_idSF = cms.untracked.bool(True)
+process.ggNtuplizer.applyEGMCorrections = cms.bool(True)
+process.ggNtuplizer.development_ = cms.untracked.bool(True)
 
 process.edTask = cms.Task()
 for key in process.__dict__.keys():
@@ -332,12 +325,8 @@ process.p = cms.Path(
     *process.allMetFilterPaths              # NEEDED for MET filter flags
     *process.egmGsfElectronIDSequence       # NEEDED for electron ID
     *process.electronMVAValueMapProducer
-    #*process.qgtagger                       # NEEDED for QG likelihood
-    #*process.pileupJetID                    # NEEDED for pileup jet ID
-    #*process.slimmedJetsPuppiWithInfo       # NEEDED for updated jets
-    #*process.slimmedMuonsUpdated            # NEEDED for updated muons
+    *process.slimmedMuonsUpdated            # NEEDED for updated muons
     *process.ggNtuplizer
-    #,process.edTask
 )
 
 from PhysicsTools.PatAlgos.tools.helpers import getPatAlgosToolsTask
@@ -353,10 +342,6 @@ process.schedule = cms.Schedule(
 process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(False))
 process.options.allowUnscheduled = cms.untracked.bool(True)
 
-
-
-#Debug error
-process.maxEvents = cms.untracked.PSet(input=cms.untracked.int32(3))  # Changed from -1 to 3
 
 # Add message logger settings:
 process.MessageLogger.cerr.FwkReport.reportEvery = 1

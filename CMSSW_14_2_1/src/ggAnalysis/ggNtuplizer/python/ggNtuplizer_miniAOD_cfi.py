@@ -81,7 +81,6 @@ ggNtuplizer = cms.EDAnalyzer("ggNtuplizer",
                              dataYear = cms.int32(2022),
                              dataPeriod = cms.string("C"),
                              isData = cms.bool(True),
-                             useETDependentCorrections = cms.bool(True),
                              applyEGMCorrections = cms.bool(False),
 
                              YEAR = cms.untracked.string("2022"),

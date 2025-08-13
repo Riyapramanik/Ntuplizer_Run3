@@ -67,7 +67,6 @@ ggNtuplizer::ggNtuplizer(const edm::ParameterSet& ps) :
   mJetVetoMap = ps.getParameter<std::string>("JetVetoMap");
   
   store_electron_scalnsmear = ps.getUntrackedParameter<bool>("store_electron_scalnsmear", false);
-  store_photon_scalnsmear = ps.getUntrackedParameter<bool>("store_photon_scalnsmear", false);
   store_electrons = ps.getUntrackedParameter<bool>("store_electrons", false);
   store_muons = ps.getUntrackedParameter<bool>("store_muons", false);
   store_photons = ps.getUntrackedParameter<bool>("store_photons", false);
@@ -75,12 +74,10 @@ ggNtuplizer::ggNtuplizer(const edm::ParameterSet& ps) :
   store_CHS_met   = ps.getUntrackedParameter<bool>("store_CHS_met", false);
   store_PUPPI_met = ps.getUntrackedParameter<bool>("store_PUPPI_met", false);
   store_electron_idSF      = ps.getUntrackedParameter<bool>("store_electron_idSF", false);
-  store_photon_idSF        = ps.getUntrackedParameter<bool>("store_photon_idSF", false);
      
   //Scale and Smearing for electron and photon
   dataYear_ = ps.getParameter<int>("dataYear");
   dataPeriod_ = ps.getParameter<std::string>("dataPeriod");
-  useETDependentCorrections_ = ps.getParameter<bool>("useETDependentCorrections");
   applyEGMCorrections_ = ps.getParameter<bool>("applyEGMCorrections");
 
   store_CHS_met   = ps.getUntrackedParameter<bool>("store_CHS_met", false);
@@ -110,10 +107,10 @@ ggNtuplizer::ggNtuplizer(const edm::ParameterSet& ps) :
 
   std::cout << "JEC and JER Files"<< std::endl;
   
-  edm::Service<TFileService> fs;
+  Service<TFileService> fs;
   tree_    = fs->make<TTree>("EventTree", "Event data");
   std::cout << "tree_"<< std::endl;
-  hEvents_ = fs->make<TH1F>("hEvents",    "total processed and skimmed events",   2,  0,   2);
+  hEvents_ = fs->make<TH1F>("hEvents","total processed and skimmed events",   2,  0,   2);
   std::cout << "hEvents_"<< std::endl;
 
   branchesGlobalEvent(tree_);
@@ -127,23 +124,19 @@ ggNtuplizer::ggNtuplizer(const edm::ParameterSet& ps) :
     } 
   
   std::cout << "Gen particle "<< std::endl;
-  branchesMET(tree_);
-  std::cout << "Met branches fill1"<< std::endl;
+ 
   branchesPhotons(tree_);
-  std::cout << "Photon branches fill1"<< std::endl;
   branchesElectrons(tree_);
-  std::cout << "Electron branches fill2"<< std::endl;
+  branchesAK4PUPPIJets(tree_);
+  branchesMET(tree_);
   branchesMuons(tree_);
-  std::cout << "Muon branches fill2"<< std::endl;
-  //branchesAK4PUPPIJets(tree_);
-  std::cout << "Puppi branches fill2"<< std::endl;
+  
   std::cout << "leaving ggNtuplizer constructor"<<std::endl;
   
 }
 
 ggNtuplizer::~ggNtuplizer() {
-  cleanupPhotons();
- 
+
 }
 
 //Initializing JER and JEC files
@@ -168,27 +161,22 @@ void ggNtuplizer::beginJob() {
 
   //scale and smearing for electron and photon          
    if (applyEGMCorrections_) {
-        try {
-            egmCorrectionManager_ = std::make_unique<EGMCorrectionManager>(
-                dataYear_, dataPeriod_, useETDependentCorrections_
-                                                                           );
-	}catch (const std::exception& e) {
-          applyEGMCorrections_ = false;
-        }
+     std::cout << "DEBUG: Attempting to initialize EGMCorrectionManager with:" << std::endl;
+        std::cout << "  dataYear_: " << dataYear_ << std::endl;
+        std::cout << "  dataPeriod_: " << dataPeriod_ << std::endl;
+    
+	egmCorrectionManager_ = std::make_unique<EGMCorrectionManager>(dataYear_, dataPeriod_);
+	std::cout<<"egmCorrectionManager_"<<std::endl;
    }
 
-   if (store_electron_idSF || store_photon_idSF) {
 	egmIDSFManager_ = std::make_unique<EGMIDSFManager>(dataYear_, dataPeriod_);
-   }
 
-   std::cout << "DEBUG: ggNtuplizer beginJob() completed successfully!" << std::endl;
+	std::cout << "DEBUG: ggNtuplizer beginJob() completed successfully!" << std::endl;
    
 }
 
 void ggNtuplizer::analyze(const edm::Event& e, const edm::EventSetup& es) {
   std::cout << "=== ANALYZE FUNCTION CALLED FOR EVENT "<< " ===" << std::endl;
-  
-  try{
   std::cout << "DEBUG: ggNtuplizer analyze() called for event " << e.id() << std::endl;
 
   hEvents_->Fill(0.5);
@@ -220,34 +208,17 @@ void ggNtuplizer::analyze(const edm::Event& e, const edm::EventSetup& es) {
       fillGenPart(e);
   }
 
-  fillMET(e, es);
+  fillPhotons(e, es);
   fillElectrons(e, es, pv);
-  fillMuons(e, pv, vtx);
-  if(store_photons){fillPhotons(e, es);};
   fillAK4PUPPIJets(e, es);
-
-  std::cout << "DEBUG: About to fill tree for event " << e.id().event() << std::endl;
-  
+  fillMET(e, es);
+  fillMuons(e, pv, vtx);
   hEvents_->Fill(1.5);
-
-  std::cout<<"Now about to fill the tree"<<std::endl;
-  if (!tree_)
-{
-  std::cout<<"Pointer is Null"<<std::endl;    // Proceed
-}
+  
   tree_->Fill();
-
   std::cout << "DEBUG: Tree filled successfully" << std::endl;
-  }
-  catch (const std::exception& ex) {
-    std::cout << "ERROR in ggNtuplizer::analyze(): " << ex.what() << std::endl;
-    throw; // Re-throw to let CMSSW handle it
-  } catch (...) {
-    std::cout << "UNKNOWN ERROR in ggNtuplizer::analyze()" << std::endl;
-    throw;
-  }
+ 
 }
-
 
 void ggNtuplizer::endJob() {
 

@@ -13,7 +13,7 @@
 class EGMIDSFManager {
 public:
     // Constructor
-    EGMIDSFManager(int year, const std::string& period, bool useHTT = false);
+    EGMIDSFManager(int year, const std::string& period);
     
     // Electron ID Scale Factors (always require phi for accuracy)
     double getElectronIDSF(const std::string& idType, double pt, double eta,double phi);
@@ -28,7 +28,6 @@ public:
 private:
     int year_;
     std::string period_;
-    bool useHTT_;
     std::unique_ptr<correction::CorrectionSet> electronIDCorrectionSet_;
     std::unique_ptr<correction::CorrectionSet> photonIDCorrectionSet_;
     std::map<std::string, correction::Correction::Ref> electronIDEvaluators_;

@@ -63,7 +63,7 @@ vector<float>  eleGSFChi2_;
 vector<UShort_t>  eleIDbit_;
 
 //Scale and smearing value
-vector<float>  eleTrkEnergyPostCorr_;
+yearSuffixvector<float>  eleTrkEnergyPostCorr_;
 vector<float>  eleenergyScaleValue_;
 vector<float>  eleenergySigmaValue_;
 vector<float>  eleScale_unc_up_;
@@ -72,35 +72,9 @@ vector<float>  eleSigma_unc_up_;
 vector<float>  eleSigma_unc_dn_;
 
 //ID SF and SF Uncertainity
-vector<float>  eleIDSF_Loose_;
-vector<float>  eleIDSF_Medium_;
 vector<float>  eleIDSF_Tight_;
-vector<float>  eleIDSF_wp80iso_;
-vector<float>  eleIDSF_wp90iso_;
-
-vector<float>  eleIDSFUp_Loose_;
-vector<float>  eleIDSFUp_Medium_;
 vector<float>  eleIDSFUp_Tight_;
-vector<float>  eleIDSFUp_wp80iso_;      
-vector<float>  eleIDSFUp_wp90iso_;
-
-vector<float>  eleIDSFDown_Loose_;
-vector<float>  eleIDSFDown_Medium_;
 vector<float>  eleIDSFDown_Tight_;
-vector<float>  eleIDSFDown_wp80iso_;   
-vector<float>  eleIDSFDown_wp90iso_;
-//End ID SF and SF Uncertainity
-
-vector<vector<float> > eleGSFPt_;
-vector<vector<float> > eleGSFEta_;
-vector<vector<float> > eleGSFPhi_;
-vector<vector<float> > eleGSFCharge_;
-vector<vector<int> >   eleGSFHits_;
-vector<vector<int> >   eleGSFMissHits_;
-vector<vector<int> >   eleGSFNHitsMax_;
-vector<vector<float> > eleGSFVtxProb_;
-vector<vector<float> > eleGSFlxyPV_;
-vector<vector<float> > eleGSFlxyBS_;
 
 vector<vector<float> > eleESEnEta_;
 vector<vector<float> > eleESEnPhi_;
@@ -143,7 +117,7 @@ void ggNtuplizer::branchesElectrons(TTree* tree) {
   tree->Branch("eleHoverE",               &eleHoverE_);
   tree->Branch("eleEoverP",               &eleEoverP_);
   tree->Branch("eleEoverPout",            &eleEoverPout_);
-  tree->Branch("eleEoverPInv",            &eleEoverPInv_);
+  tree->BryearSuffixanch("eleEoverPInv",            &eleEoverPInv_);
   tree->Branch("eleBrem",                 &eleBrem_);
   tree->Branch("eledEtaAtVtx",            &eledEtaAtVtx_);
   tree->Branch("eledPhiAtVtx",            &eledPhiAtVtx_);
@@ -165,19 +139,8 @@ void ggNtuplizer::branchesElectrons(TTree* tree) {
   tree->Branch("eleKFHits",                   &eleKFHits_);
   tree->Branch("eleKFChi2",                   &eleKFChi2_);
   tree->Branch("eleGSFChi2",                  &eleGSFChi2_);
-  tree->Branch("eleGSFPt",                    &eleGSFPt_);
-  tree->Branch("eleGSFEta",                   &eleGSFEta_);
-  tree->Branch("eleGSFPhi",                   &eleGSFPhi_);
-  tree->Branch("eleGSFCharge",                &eleGSFCharge_);
-  tree->Branch("eleGSFHits",                  &eleGSFHits_);
-  tree->Branch("eleGSFMissHits",              &eleGSFMissHits_);
-  tree->Branch("eleGSFNHitsMax",              &eleGSFNHitsMax_);
-  tree->Branch("eleGSFVtxProb",               &eleGSFVtxProb_);
-  tree->Branch("eleGSFlxyPV",                 &eleGSFlxyPV_);
-  tree->Branch("eleGSFlxyBS",                 &eleGSFlxyBS_);
+
   tree->Branch("eleIDbit",                    &eleIDbit_);
-  
-  if(store_electron_scalnsmear){
   tree->Branch("eleecalTrkEnergyPostCorr",      &eleTrkEnergyPostCorr_);
   tree->Branch("eleenergyScaleValue",            &eleenergyScaleValue_);
   tree->Branch("eleenergySigmaValue_",        &eleenergySigmaValue_);
@@ -185,30 +148,12 @@ void ggNtuplizer::branchesElectrons(TTree* tree) {
   tree->Branch("eleScale_unc_dn",            &eleScale_unc_dn_);
   tree->Branch("eleSigma_unc_up",             &eleSigma_unc_up_);
   tree->Branch("eleSigma_unc_dn",             &eleSigma_unc_dn_);
-  }
 
-  if(store_electron_idSF){
   // Scale factors
-  tree->Branch("eleIDSF_Loose",      &eleIDSF_Loose_);
-  tree->Branch("eleIDSF_Medium",     &eleIDSF_Medium_);
   tree->Branch("eleIDSF_Tight",      &eleIDSF_Tight_);
-  tree->Branch("eleIDSF_wp80iso",    &eleIDSF_wp80iso_);
-  tree->Branch("eleIDSF_wp90iso",    &eleIDSF_wp90iso_);
-  
-  // Uncertainties UP
-  tree->Branch("eleIDSFUp_Loose",    &eleIDSFUp_Loose_);
-  tree->Branch("eleIDSFUp_Medium",   &eleIDSFUp_Medium_);
   tree->Branch("eleIDSFUp_Tight",    &eleIDSFUp_Tight_);
-  tree->Branch("eleIDSFUp_wp80iso",  &eleIDSFUp_wp80iso_);  
-  tree->Branch("eleIDSFUp_wp90iso",  &eleIDSFUp_wp90iso_);   
-  
-  // Uncertainties DOWN
-  tree->Branch("eleIDSFDown_Loose",    &eleIDSFDown_Loose_);
-  tree->Branch("eleIDSFDown_Medium",   &eleIDSFDown_Medium_);
   tree->Branch("eleIDSFDown_Tight",    &eleIDSFDown_Tight_);
-  tree->Branch("eleIDSFDown_wp80iso",  &eleIDSFDown_wp80iso_);
-  tree->Branch("eleIDSFDown_wp90iso",  &eleIDSFDown_wp90iso_);  
-}
+  
 
   if (development_) {
     tree->Branch("eleESEnP1Raw",              &eleESEnP1Raw_);
@@ -287,33 +232,13 @@ void ggNtuplizer::fillElectrons(const edm::Event &e, const edm::EventSetup &es, 
   eleKFHits_                  .clear();
   eleKFChi2_                  .clear();
   eleGSFChi2_                 .clear();
-  eleGSFPt_                   .clear();
-  eleGSFEta_                  .clear();
-  eleGSFPhi_                  .clear();
-  eleGSFCharge_               .clear();
-  eleGSFHits_                 .clear();
-  eleGSFMissHits_             .clear();
-  eleGSFNHitsMax_             .clear();
-  eleGSFVtxProb_              .clear();
-  eleGSFlxyPV_                .clear();
-  eleGSFlxyBS_                .clear();
+   
   eleIDbit_                   .clear();
-
-  eleIDSF_Loose_       .clear();
-  eleIDSF_Medium_      .clear();
+  
   eleIDSF_Tight_       .clear();
-  eleIDSF_wp80iso_     .clear();
-  eleIDSF_wp90iso_     .clear();
-  eleIDSFUp_Loose_     .clear();
-  eleIDSFUp_Medium_    .clear();
   eleIDSFUp_Tight_     .clear();
-  eleIDSFUp_wp80iso_   .clear();   
-  eleIDSFUp_wp90iso_   .clear();     
-  eleIDSFDown_Loose_   .clear();
-  eleIDSFDown_Medium_  .clear();
   eleIDSFDown_Tight_   .clear();
-  eleIDSFDown_wp80iso_ .clear(); 
-  eleIDSFDown_wp90iso_ .clear();  
+  
   
   eleTrkEnergyPostCorr_       .clear();
   eleenergyScaleValue_        .clear();
@@ -325,6 +250,8 @@ void ggNtuplizer::fillElectrons(const edm::Event &e, const edm::EventSetup &es, 
   }
   
   nEle_ = 0;
+
+  std::cout<<"*****Electron begin**************"<<std::endl;
 
   edm::Handle<edm::View<pat::Electron> > electronHandle;
   e.getByToken(electronCollection_, electronHandle);
@@ -393,8 +320,6 @@ void ggNtuplizer::fillElectrons(const edm::Event &e, const edm::EventSetup &es, 
     eleR9Full5x5_           .push_back(iEle->full5x5_r9());
     eleEcalDrivenSeed_      .push_back(iEle->ecalDrivenSeed());
     
-    if(store_electron_scalnsmear){
-      try{
 	float originalPt = iEle->pt();
 	float scEta = iEle->superCluster()->eta();
 	float r9 = iEle->r9();
@@ -402,12 +327,15 @@ void ggNtuplizer::fillElectrons(const edm::Event &e, const edm::EventSetup &es, 
 	int seedGain = EGMCorrectionManager::GetSeedGain(seedDetId, e, ebReducedRecHitCollection_, eeReducedRecHitCollection_);
 	int run = isData_ ? e.id().run() : 1;
 	double randomNum = isData_ ? 0.0 : normalDistribution_(randomGenerator_);
+	std::cout<<__LINE__<<std::endl;
 	double correctedPt = egmCorrectionManager_->applyCorrectedElectronPt(originalPt, run, scEta, r9, seedGain, isData_, randomNum);
 	eleTrkEnergyPostCorr_.push_back(correctedPt);
+	std::cout<<__LINE__<<std::endl;
 	if (isData_) {
 	  double scale = egmCorrectionManager_->getElectronScale(run, scEta, r9, originalPt, seedGain);
+	  std::cout<<__LINE__<<std::endl;
 	  double scaleUnc = egmCorrectionManager_->getElectronScaleUnc(originalPt, r9, std::abs(scEta));
-   	  
+   	  std::cout<<__LINE__<<std::endl;
 	  eleenergyScaleValue_.push_back(scale);
 	  eleScale_unc_up_.push_back(scale + scaleUnc);
 	  eleScale_unc_dn_.push_back(scale - scaleUnc);
@@ -415,7 +343,7 @@ void ggNtuplizer::fillElectrons(const edm::Event &e, const edm::EventSetup &es, 
 	  eleenergySigmaValue_.push_back(0.0); // No smearing for data
 	  eleSigma_unc_up_.push_back(0.0);
 	  eleSigma_unc_dn_.push_back(0.0);
-	  
+	  std::cout<<__LINE__<<std::endl;
 	} else {
           double smear = egmCorrectionManager_->getElectronSmear(originalPt, r9, std::abs(scEta));
           double smearUnc = egmCorrectionManager_->getElectronSmearUnc(originalPt, r9, std::abs(scEta));
@@ -428,45 +356,16 @@ void ggNtuplizer::fillElectrons(const edm::Event &e, const edm::EventSetup &es, 
 	  eleSigma_unc_up_.push_back(smear + smearUnc);
           eleSigma_unc_dn_.push_back(smear - smearUnc);
 	}
-      }
-      catch (const std::exception& e) {
-      // Fall back to original values
-      eleTrkEnergyPostCorr_.push_back(iEle->pt());
-      eleenergyScaleValue_.push_back(1.0);
-      eleenergySigmaValue_.push_back(0.0);
-      eleScale_unc_up_.push_back(1.0);
-      eleScale_unc_dn_.push_back(1.0);
-      eleSigma_unc_up_.push_back(0.0);
-      eleSigma_unc_dn_.push_back(0.0);
-    }
-
-    }//End of scale and smearing
-
+  std::cout<<__LINE__<<std::endl;
     //store SF and SF unc
-    if(store_electron_idSF){
     double pt = iEle->pt();
     double eta = iEle->eta();
     double phi = iEle->phi();
-    
-    eleIDSF_Loose_.push_back(egmIDSFManager_->getElectronIDSF("Loose", pt, eta, phi));
-    eleIDSF_Medium_.push_back(egmIDSFManager_->getElectronIDSF("Medium", pt, eta, phi));
+
     eleIDSF_Tight_.push_back(egmIDSFManager_->getElectronIDSF("Tight", pt, eta, phi));
-    eleIDSF_wp80iso_.push_back(egmIDSFManager_->getElectronIDSF("wp80iso", pt, eta, phi));
-    eleIDSF_wp90iso_.push_back(egmIDSFManager_->getElectronIDSF("wp90iso", pt, eta, phi));
-    
-    eleIDSFUp_Loose_.push_back(egmIDSFManager_->getElectronIDSFUncUp("Loose", pt, eta, phi));
-    eleIDSFUp_Medium_.push_back(egmIDSFManager_->getElectronIDSFUncUp("Medium", pt, eta, phi));
     eleIDSFUp_Tight_.push_back(egmIDSFManager_->getElectronIDSFUncUp("Tight", pt, eta, phi));
-    eleIDSFUp_wp80iso_.push_back(egmIDSFManager_->getElectronIDSFUncUp("wp80iso", pt, eta, phi));  
-    eleIDSFUp_wp90iso_.push_back(egmIDSFManager_->getElectronIDSFUncUp("wp90iso", pt, eta, phi));  
-    
-    eleIDSFDown_Loose_.push_back(egmIDSFManager_->getElectronIDSFUncDown("Loose", pt, eta, phi));
-    eleIDSFDown_Medium_.push_back(egmIDSFManager_->getElectronIDSFUncDown("Medium", pt, eta, phi));
     eleIDSFDown_Tight_.push_back(egmIDSFManager_->getElectronIDSFUncDown("Tight", pt, eta, phi));
-    eleIDSFDown_wp80iso_.push_back(egmIDSFManager_->getElectronIDSFUncDown("wp80iso", pt, eta, phi)); 
-    eleIDSFDown_wp90iso_.push_back(egmIDSFManager_->getElectronIDSFUncDown("wp90iso", pt, eta, phi));  
-  }//End of SF
-    
+
     reco::GsfTrackRef gsfTrackRef = iEle->gsfTrack();
     if (iEle->gsfTrack().isNonnull()) {
       eleGSFChi2_.push_back(gsfTrackRef->normalizedChi2());
@@ -478,7 +377,7 @@ void ggNtuplizer::fillElectrons(const edm::Event &e, const edm::EventSetup &es, 
       eleGSFChi2_.push_back(999.);
       eleTrkdxy_.push_back(-999);
     }
-    
+    std::cout<<__LINE__<<std::endl;
     reco::TrackRef kfTrackRef = iEle->closestCtfTrackRef();
     if (kfTrackRef.isAvailable() && kfTrackRef.isNonnull()) {
       eleKFHits_.push_back(kfTrackRef->hitPattern().trackerLayersWithMeasurement());
@@ -528,7 +427,7 @@ void ggNtuplizer::fillElectrons(const edm::Event &e, const edm::EventSetup &es, 
       eleESEnS_.push_back(ESS);
       eleESEnE_.push_back(ESE);
     }
-
+    std::cout<<__LINE__<<std::endl;
     // VID decisions 
     UShort_t tmpeleIDbit = 0;  
     bool isPassVeto = iEle->electronID("cutBasedElectronID-RunIIIWinter22-V1-veto");
@@ -570,7 +469,7 @@ void ggNtuplizer::fillElectrons(const edm::Event &e, const edm::EventSetup &es, 
       gsfPhi_.push_back(ig->phi());
       nGSFTrk_++;
     }
-    
+    std::cout<<__LINE__<<std::endl;
   }
   
 

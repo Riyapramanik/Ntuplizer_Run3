@@ -92,8 +92,7 @@ class ggNtuplizer : public edm::one::EDAnalyzer<edm::one::SharedResources> {
   
   void branchesAK4PUPPIJets(TTree* tree);
   void fillAK4PUPPIJets(const edm::Event& e, const edm::EventSetup& es);
-  void cleanupPhotons();
-
+  
   bool development_;
   bool addFilterInfoMINIAOD_;  
   bool doGenParticles_;
@@ -153,8 +152,8 @@ class ggNtuplizer : public edm::one::EDAnalyzer<edm::one::SharedResources> {
   bool isMC;
   bool isRun3;
   bool isUltraLegacy;
-  bool store_electron_scalnsmear,store_photon_scalnsmear;
-  bool store_electrons, store_muons, store_photons, store_ak4jets, store_CHS_met, store_PUPPI_met, store_electron_idSF, store_photon_idSF;
+  bool store_electron_scalnsmear;
+  bool store_electrons, store_muons, store_photons, store_ak4jets, store_CHS_met, store_PUPPI_met, store_electron_idSF;
 
   edm::EDGetTokenT<pat::TriggerObjectStandAloneCollection> triggerObjects_;
   edm::EDGetTokenT<pat::PackedTriggerPrescales> triggerPrescales_;
@@ -175,7 +174,6 @@ class ggNtuplizer : public edm::one::EDAnalyzer<edm::one::SharedResources> {
   std::normal_distribution<double> normalDistribution_;
   int dataYear_;
   std::string dataPeriod_;
-  bool useETDependentCorrections_;
   bool applyEGMCorrections_;
   bool isData_;
 

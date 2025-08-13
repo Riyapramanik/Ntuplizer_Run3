@@ -21,7 +21,7 @@
 
 class EGMCorrectionManager {
 public:
-    EGMCorrectionManager(int year, const std::string& period = "", bool useETDependent = true);
+    EGMCorrectionManager(int year, const std::string& period = "");
     ~EGMCorrectionManager() = default;
     
     // Apply corrections and get corrected pT
@@ -72,9 +72,9 @@ private:
     std::unique_ptr<correction::CorrectionSet> photonCorrectionSet_;
     
     // The actual correction functions
-    correction::Correction::Ref electronScaleEvaluator_;  // For data scale corrections
+    correction::CompoundCorrection::Ref electronScaleEvaluator_;  // For data scale corrections
     correction::Correction::Ref electronSmearEvaluator_; // For MC smearing corrections  
-    correction::Correction::Ref photonScaleEvaluator_;   // For data scale corrections
+    correction::CompoundCorrection::Ref photonScaleEvaluator_;   // For data scale correction
     correction::Correction::Ref photonSmearEvaluator_;   // For MC smearing corrections
 };
 

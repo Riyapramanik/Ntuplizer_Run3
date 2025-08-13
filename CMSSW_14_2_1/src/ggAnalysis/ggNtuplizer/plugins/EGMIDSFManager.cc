@@ -2,21 +2,20 @@
 #include <iostream>
 #include <fstream>
 #include <stdexcept>
-#include <cstdlib>
 #include "ggAnalysis/ggNtuplizer/interface/EGMIDSFManager.h"
 
-EGMIDSFManager::EGMIDSFManager(int year, const std::string& period, bool useHTT)
-    : year_(year), period_(period), useHTT_(useHTT) {
+EGMIDSFManager::EGMIDSFManager(int year, const std::string& period)
+    : year_(year), period_(period) {
     initializeCorrections();
 }
 
 
 void EGMIDSFManager::initializeCorrections() {
+
+  std::cout<<"======initializeCorrections========="<<std::endl;
+  
     std::string electronIDFile = getElectronIDJSONFile();
     std::string photonIDFile = getPhotonIDJSONFile();
-    
-    unzipFileIfNeeded(electronIDFile);
-    unzipFileIfNeeded(photonIDFile);
     
     electronIDCorrectionSet_ = correction::CorrectionSet::from_file(electronIDFile);
     photonIDCorrectionSet_ = correction::CorrectionSet::from_file(photonIDFile);
@@ -29,152 +28,133 @@ void EGMIDSFManager::initializeCorrections() {
 std::string EGMIDSFManager::getElectronIDJSONFile() {
 
   std::cout<<"======EGMIDSFManager.cc========="<<std::endl;
-  
-    if (year_ == 2022) {
-        if (period_ == "B" || period_ == "C" || period_ == "D" || 
-            period_ == "preEE" || period_.empty()) {
-            return "/eos/cms/store/group/phys_egamma/correctionlibJSONs/Run3_2022_recoBCDE_PromptFG/2022Re-recoBCD/electron.json.gz";
+  std::string basePath = "/eos/user/r/rpramani/run3_ntuplizer/CMSSW_14_2_1/src/ggAnalysis/ggNtuplizer/test/ElectronJson/";
+
+  if (year_ == 2022) {
+        if (period_ == "B" || period_ == "C" || period_ == "D") {
+            return basePath + "electronID_highPt_22_BCD.json";
         }
-        else if (period_ == "E" || period_ == "F" || period_ == "G" || period_ == "postEE") {
-            return "/eos/cms/store/group/phys_egamma/correctionlibJSONs/Run3_2022_recoBCDE_PromptFG/2022Re-recoE+PromptFG/electron.json.gz";
+        else if (period_ == "E" || period_ == "F" || period_ == "G") {
+            return basePath + "electronID_highPt_22_EFG.json";
         }
     } 
     else if (year_ == 2023) {
-        if (period_ == "C" || period_ == "preBPIX") {
-            return "/eos/cms/store/group/phys_egamma/correctionlibJSONs/Run3_2023_PromptCD/2023PromptC/electron.json.gz";
+        if (period_ == "C") {
+            return basePath + "electronID_highPt_23_C.json";
         }
-        else if (period_ == "D" || period_ == "postBPIX") {
-            return "/eos/cms/store/group/phys_egamma/correctionlibJSONs/Run3_2023_PromptCD/2023PromptD/electron.json.gz";
+        else if (period_ == "D") {
+            return basePath + "electronID_highPt_23_D.json";
         }
     }
     
-    throw std::runtime_error("Year " + std::to_string(year_) + " period " + period_ + " not supported for electron ID");
+    return ""; 
 }
 
 
 std::string EGMIDSFManager::getPhotonIDJSONFile() {
+    std::string basePath = "/eos/user/r/rpramani/run3_ntuplizer/CMSSW_14_2_1/src/ggAnalysis/ggNtuplizer/test/PhotonJson/";
+    
     if (year_ == 2022) {
-        if (period_ == "B" || period_ == "C" || period_ == "D" || 
-            period_ == "preEE" || period_.empty()) {
-            return "/eos/cms/store/group/phys_egamma/correctionlibJSONs/Run3_2022_recoBCDE_PromptFG/2022Re-recoBCD/photon.json.gz";
+        if (period_ == "B" || period_ == "C" || period_ == "D") {
+            return basePath + "photonID_highPt_22_BCD.json";
         }
-        else if (period_ == "E" || period_ == "F" || period_ == "G" || period_ == "postEE") {
-            return "/eos/cms/store/group/phys_egamma/correctionlibJSONs/Run3_2022_recoBCDE_PromptFG/2022Re-recoE+PromptFG/photon.json.gz";
+        else if (period_ == "E" || period_ == "F" || period_ == "G") {
+            return basePath + "photonID_highPt_22_EFG.json";
         }
     } 
     else if (year_ == 2023) {
-        if (period_ == "C" || period_ == "preBPIX") {
-            return "/eos/cms/store/group/phys_egamma/correctionlibJSONs/Run3_2023_PromptCD/2023PromptC/photon.json.gz";
+        if (period_ == "C") {
+            return basePath + "photonID_highPt_23_C.json";
         }
-        else if (period_ == "D" || period_ == "postBPIX") {
-            return "/eos/cms/store/group/phys_egamma/correctionlibJSONs/Run3_2023_PromptCD/2023PromptD/photon.json.gz";
+        else if (period_ == "D") {
+            return basePath + "photonID_highPt_23_D.json";
         }
     }
     
-    throw std::runtime_error("Year " + std::to_string(year_) + " period " + period_ + " not supported for photon ID");
-}
-
-void EGMIDSFManager::unzipFileIfNeeded(const std::string& filePath) {
-    std::ifstream file(filePath);
-    if (file.good()) {
-        return;
-    }
-    
-    std::string gzFilePath = filePath + ".gz";
-    std::string unzipCmd = "gunzip -k " + gzFilePath;
-    int result = system(unzipCmd.c_str());
-    
-    if (result != 0) {
-        throw std::runtime_error("Failed to unzip file: " + gzFilePath);
-    }
+    return "";  
 }
 
 
 void EGMIDSFManager::setupElectronIDEvaluators() {
-  std::vector<std::string> idTypes = {
+    std::vector<std::string> idTypes = {
         "Loose", "Medium", "Tight", "wp80iso", "wp90iso"
     };
+
+    std::cout<<"****************setupElectronIDEvaluators*******"<<std::endl;
     
     std::string correctionName = "Electron-ID-SF";
-    
-    try {
-        auto correctionRef = electronIDCorrectionSet_->at(correctionName);
+    auto correctionRef = electronIDCorrectionSet_->at(correctionName);
         for (const auto& idType : idTypes) {
             electronIDEvaluators_[idType] = correctionRef;
-        }
-    } catch (const std::exception& e) {
-        std::cout << "Warning: Could not find " << correctionName << " in electron ID file: " << e.what() << std::endl;
-    }
+	}
 }
 
-
 void EGMIDSFManager::setupPhotonIDEvaluators() {
-    // Setup evaluators for photon ID working points
     std::vector<std::string> idTypes = {
         "Loose", "Medium", "Tight", "wp80", "wp90"
     };
+
+    std::cout<<"****************setupPhotonIDEvaluators*******"<<std::endl;
+    std::cout << "Available corrections in photon ID file:" << std::endl;
+    for (const auto& [name, corr] : *photonIDCorrectionSet_) {
+        std::cout << "  Available correction: " << name << std::endl;
+    }
     
     std::string correctionName = "Photon-ID-SF";
-    
-    try {
-        auto correctionRef = photonIDCorrectionSet_->at(correctionName);
+    auto correctionRef = photonIDCorrectionSet_->at(correctionName);
         for (const auto& idType : idTypes) {
             photonIDEvaluators_[idType] = correctionRef;
         }
-    } catch (const std::exception& e) {
-        std::cout << "Warning: Could not find " << correctionName << " in photon ID file: " << e.what() << std::endl;
-    }
 }
 
 std::string EGMIDSFManager::getYearValue() {
     if (year_ == 2022) {
-        if (period_ == "B" || period_ == "C" || period_ == "D" || 
-            period_ == "preEE" || period_.empty()) {
+        if (period_ == "B" || period_ == "C" || period_ == "D") {
             return "2022Re-recoBCD";
         }
-        else if (period_ == "E" || period_ == "F" || period_ == "G" || period_ == "postEE") {
+        else if (period_ == "E" || period_ == "F" || period_ == "G") {
             return "2022Re-recoE+PromptFG";
         }
     } 
     else if (year_ == 2023) {
-        if (period_ == "C" || period_ == "preBPIX") {
+        if (period_ == "C") {
             return "2023PromptC";
         }
-        else if (period_ == "D" || period_ == "postBPIX") {
+        else if (period_ == "D" ) {
             return "2023PromptD";
         }
     }
     
-    throw std::runtime_error("Year " + std::to_string(year_) + " period " + period_ + " not supported");
+    return ""; // Default
 }
 
 double EGMIDSFManager::getElectronIDSF(const std::string& idType, double pt, double eta, double phi) {    
     std::string yearValue = getYearValue();
-    return electronIDEvaluators_[idType]->evaluate({yearValue, "sf", idType, eta, pt, phi});
+    return electronIDEvaluators_[idType]->evaluate({yearValue, "sf", idType, eta, pt});
 }
 
 double EGMIDSFManager::getElectronIDSFUncUp(const std::string& idType, double pt, double eta, double phi) {    
     std::string yearValue = getYearValue();
-    return electronIDEvaluators_[idType]->evaluate({yearValue, "sfup", idType, eta, pt, phi});
+    return electronIDEvaluators_[idType]->evaluate({yearValue, "sfup", idType, eta, pt});
 }
 
 double EGMIDSFManager::getElectronIDSFUncDown(const std::string& idType, double pt, double eta, double phi) {
     std::string yearValue = getYearValue();
-    return electronIDEvaluators_[idType]->evaluate({yearValue, "sfdown", idType, eta, pt, phi});
+    return electronIDEvaluators_[idType]->evaluate({yearValue, "sfdown", idType, eta, pt});
 }
 
-// Photon ID Scale Factors
 double EGMIDSFManager::getPhotonIDSF(const std::string& idType, double pt, double eta, double phi) {    
     std::string yearValue = getYearValue();
-    return photonIDEvaluators_[idType]->evaluate({yearValue, "sf", idType, eta, pt, phi});
+    std::cout << "***getPhotonIDSF***"<<std::endl;
+    return photonIDEvaluators_[idType]->evaluate({yearValue, "sf", idType, eta, pt});
 }
 
 double EGMIDSFManager::getPhotonIDSFUncUp(const std::string& idType, double pt, double eta, double phi) {    
     std::string yearValue = getYearValue();
-    return photonIDEvaluators_[idType]->evaluate({yearValue, "sfup", idType, eta, pt, phi});
+    return photonIDEvaluators_[idType]->evaluate({yearValue, "sfup", idType, eta, pt});
 }
 
 double EGMIDSFManager::getPhotonIDSFUncDown(const std::string& idType, double pt, double eta, double phi) {   
     std::string yearValue = getYearValue();
-    return photonIDEvaluators_[idType]->evaluate({yearValue, "sfdown", idType, eta, pt, phi});
+    return photonIDEvaluators_[idType]->evaluate({yearValue, "sfdown", idType, eta, pt});
 }
