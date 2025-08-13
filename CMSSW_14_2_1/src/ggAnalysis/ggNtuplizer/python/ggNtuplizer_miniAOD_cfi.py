@@ -23,11 +23,6 @@ ggNtuplizer = cms.EDAnalyzer("ggNtuplizer",
                              store_ak4jets = cms.untracked.bool(True),
                              store_CHS_met = cms.untracked.bool(True),
                              store_PUPPI_met = cms.untracked.bool(True),
-                             store_electron_scalnsmear =  cms.untracked.bool(True),
-                             store_photon_scalnsmear =  cms.untracked.bool(True),
-                             store_electron_idSF = cms.untracked.bool(True),
-                             store_photon_idSF = cms.untracked.bool(True),
-
                              year                 = cms.int32(2022),
                              
                              patTriggerResults    = cms.InputTag("TriggerResults", "", "RECO"),

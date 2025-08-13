@@ -100,8 +100,8 @@ else:
 process.GlobalTag = GlobalTag(process.GlobalTag, '130X_dataRun3_v2')
 process.maxEvents = cms.untracked.PSet(input=cms.untracked.int32(10))
 process.MessageLogger.cerr.FwkReport.reportEvery = 5000
-#process.source = cms.Source("PoolSource", fileNames = cms.untracked.vstring('/store/data/Run2022A/EGamma/MINIAOD/22Sep2023-v1/30000/19531535-6c96-4871-aa56-8cf0b9581e6d.root'))
 process.source = cms.Source("PoolSource", fileNames = cms.untracked.vstring('/store/data/Run2022C/EGamma/MINIAOD/22Sep2023-v1/50000/6015928f-0763-4e7f-9d48-ff0f2ddaf12e.root'))
+#process.source = cms.Source("PoolSource", fileNames = cms.untracked.vstring('/store/mc/Run3Summer22EEMiniAODv4/ZGto2NuG-1Jets_PTG-100to200_TuneCP5_13p6TeV_amcatnloFXFX-pythia8/MINIAODSIM/130X_mcRun3_2022_realistic_postEE_v6-v3/2560000/0adadef6-3fb4-453d-ae24-6bc79b4338cb.root'))
 print(process.source)
 
 #!!!!!!!!!!!!!!
@@ -195,7 +195,7 @@ runMetCorAndUncFromMiniAOD(process,
 process.puppi.useExistingWeights = True
 
 #Muon information
-store_electron_idSFfrom PhysicsTools.PatAlgos.producersLayer1.muonProducer_cfi import patMuons #.miniIsoParams #as _miniIsoParams
+from PhysicsTools.PatAlgos.producersLayer1.muonProducer_cfi import patMuons #.miniIsoParams #as _miniIsoParams
 
 process.slimmedMuonsUpdated = cms.EDProducer("PATMuonUpdater",
     src = cms.InputTag("slimmedMuons"),
@@ -309,11 +309,7 @@ process.ggNtuplizer.store_photons = cms.untracked.bool(True)
 process.ggNtuplizer.store_ak4jets = cms.untracked.bool(True)
 process.ggNtuplizer.store_CHS_met = cms.untracked.bool(True)    
 process.ggNtuplizer.store_PUPPI_met = cms.untracked.bool(True)
-process.ggNtuplizer.store_electron_scalnsmear = cms.untracked.bool(True)
-process.ggNtuplizer.store_photon_scalnsmear = cms.untracked.bool(True)
-process.ggNtuplizer.store_electron_idSF = cms.untracked.bool(True)
 process.ggNtuplizer.applyEGMCorrections = cms.bool(True)
-process.ggNtuplizer.development_ = cms.untracked.bool(True)
 
 process.edTask = cms.Task()
 for key in process.__dict__.keys():
@@ -326,6 +322,9 @@ process.p = cms.Path(
     *process.egmGsfElectronIDSequence       # NEEDED for electron ID
     *process.electronMVAValueMapProducer
     *process.slimmedMuonsUpdated            # NEEDED for updated muons
+    *process.qgtagger                       # ADD THIS
+    *process.pileupJetID                    # ADD THIS
+    *process.slimmedJetsPuppiWithInfo       # ADD THIS
     *process.ggNtuplizer
 )
 

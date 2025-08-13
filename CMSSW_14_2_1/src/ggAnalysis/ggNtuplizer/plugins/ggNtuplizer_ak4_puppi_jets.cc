@@ -404,7 +404,8 @@ void ggNtuplizer::fillAK4PUPPIJets(const edm::Event& e, const edm::EventSetup& e
 	charged_ptsum_.clear();
 	jetID_tightlepveto_.clear();
 
-
+	std::cout<<"***************************Started Jets************************"<<std::endl;
+	
 	edm::Handle<edm::View<pat::Jet>> pfjetAK4s;
 	e.getByToken(tok_pfjetAK4s_, pfjetAK4s);
 	if(pfjetAK4s.isValid() && store_ak4jets){
@@ -435,14 +436,14 @@ void ggNtuplizer::fillAK4PUPPIJets(const edm::Event& e, const edm::EventSetup& e
 	 // basic selection conditions on JEC-corrected jets //                                                                                         
 	if(tmprecpt<min_pt_AK4jet) continue;
 	if(abs(ak4jet.eta())>max_eta) continue;
-
+	
 	//JEC corrected 4-momentum //                                                                                                                   
 	TLorentzVector pfjetAK4_4v_jecor;
 	pfjetAK4_4v_jecor = pfjetAK4_4v * total_cor;
 	PFJetAK4_JEC_.push_back(total_cor);
 	TLorentzVector rawP4 = pfjetAK4_4v;
 	TLorentzVector corrP4 = pfjetAK4_4v_jecor;
-
+	
 	//JEC corrected Jet variable
 	AK4PUPPIJet_Pt_.push_back(corrP4.Pt());
 	AK4PUPPIJet_En_.push_back(corrP4.Energy());
@@ -479,7 +480,6 @@ void ggNtuplizer::fillAK4PUPPIJets(const edm::Event& e, const edm::EventSetup& e
 
 	for (int isrc = 0; isrc < njecmcmx; ++isrc) {
 	  double sup = 1.0;
-	  
 	  JetCorrectionUncertainty* jecUnc = nullptr;
 	  if (isrc > 0 && isrc <= nsrc) {
 	    jecUnc = vsrc[isrc - 1];
@@ -560,18 +560,12 @@ void ggNtuplizer::fillAK4PUPPIJets(const edm::Event& e, const edm::EventSetup& e
     AK4idvars.NumConst = (ak4jet.isPFJet()) ? (ak4jet.chargedMultiplicity() + ak4jet.neutralMultiplicity()) : 1;
     AK4idvars.NumNeutralParticle = (ak4jet.isPFJet()) ? ak4jet.neutralMultiplicity() : 1;
     AK4idvars.CHM  = (ak4jet.isPFJet()) ? ak4jet.chargedHadronMultiplicity() : 1;
-    
     jetID_.push_back(getJetID(AK4idvars, "CHS", year, pfjetAK4_4v.Eta(), false, isUltraLegacy, isRun3));
     jetID_tightlepveto_.push_back(getJetID(AK4idvars, "CHS", year, pfjetAK4_4v.Eta(), true, isUltraLegacy, isRun3));
     
     // Jet veto flag
-    file_jetvetomap = new TFile(mJetVetoMap.c_str(),"read");
-    h_jetvetomap = (TH2D*)file_jetvetomap->Get("jetvetomap");
-    h_jetvetomap_eep = (TH2D*)file_jetvetomap->Get("jetvetomap_eep");
-    
     bool vetoFlag = Assign_JetVeto(pfjetAK4_4v, jetID_.back(), AK4idvars, muons, h_jetvetomap);
     bool vetoEEP  = (year == "2022EE") ? Assign_JetVeto(pfjetAK4_4v, jetID_.back(), AK4idvars, muons, h_jetvetomap_eep, 30.) : false;
-    
     jetveto_Flag_.push_back(vetoFlag);
     jetveto_eep_Flag_.push_back(vetoEEP);
     
@@ -608,6 +602,8 @@ void ggNtuplizer::fillAK4PUPPIJets(const edm::Event& e, const edm::EventSetup& e
   }
   
 	}
+
+	std::cout<<"*****************END Jets***********************"<<std::endl;
 }
 
 

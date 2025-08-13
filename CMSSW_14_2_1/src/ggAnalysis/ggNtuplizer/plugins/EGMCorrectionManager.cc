@@ -125,7 +125,6 @@ double EGMCorrectionManager::getElectronSmear(double pt, double r9, double scEta
 }
 
 double EGMCorrectionManager::getElectronScaleUnc(double pt, double r9, double scEta) {
-  std::cout<<"**********getElectronScaleUnc***********"<<std::endl;
   return electronSmearEvaluator_->evaluate({"escale",static_cast<double>(pt), static_cast<double>(r9), static_cast<double>(std::abs(scEta))});
 }
 

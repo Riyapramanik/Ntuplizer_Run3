@@ -21,8 +21,6 @@ vector<float>  eleSCEn_;
 vector<float>  eleEcalEn_;
 vector<float>  eleESEnP1_;
 vector<float>  eleESEnP2_;
-vector<float>  eleESEnP1Raw_;
-vector<float>  eleESEnP2Raw_;
 vector<float>  eleD0_;
 vector<float>  eleDz_;
 vector<float>  eleSIP_;
@@ -63,7 +61,7 @@ vector<float>  eleGSFChi2_;
 vector<UShort_t>  eleIDbit_;
 
 //Scale and smearing value
-yearSuffixvector<float>  eleTrkEnergyPostCorr_;
+vector<float>  eleTrkEnergyPostCorr_;
 vector<float>  eleenergyScaleValue_;
 vector<float>  eleenergySigmaValue_;
 vector<float>  eleScale_unc_up_;
@@ -75,20 +73,6 @@ vector<float>  eleSigma_unc_dn_;
 vector<float>  eleIDSF_Tight_;
 vector<float>  eleIDSFUp_Tight_;
 vector<float>  eleIDSFDown_Tight_;
-
-vector<vector<float> > eleESEnEta_;
-vector<vector<float> > eleESEnPhi_;
-vector<vector<int> >   eleESEnZ_;
-vector<vector<int> >   eleESEnP_;
-vector<vector<int> >   eleESEnX_;
-vector<vector<int> >   eleESEnY_;
-vector<vector<int> >   eleESEnS_;
-vector<vector<float> > eleESEnE_;
-
-Int_t nGSFTrk_;
-vector<float> gsfPt_;
-vector<float> gsfEta_;
-vector<float> gsfPhi_;
 
 void ggNtuplizer::branchesElectrons(TTree* tree) {
 
@@ -117,7 +101,7 @@ void ggNtuplizer::branchesElectrons(TTree* tree) {
   tree->Branch("eleHoverE",               &eleHoverE_);
   tree->Branch("eleEoverP",               &eleEoverP_);
   tree->Branch("eleEoverPout",            &eleEoverPout_);
-  tree->BryearSuffixanch("eleEoverPInv",            &eleEoverPInv_);
+  tree->Branch("eleEoverPInv",            &eleEoverPInv_);
   tree->Branch("eleBrem",                 &eleBrem_);
   tree->Branch("eledEtaAtVtx",            &eledEtaAtVtx_);
   tree->Branch("eledPhiAtVtx",            &eledPhiAtVtx_);
@@ -153,24 +137,7 @@ void ggNtuplizer::branchesElectrons(TTree* tree) {
   tree->Branch("eleIDSF_Tight",      &eleIDSF_Tight_);
   tree->Branch("eleIDSFUp_Tight",    &eleIDSFUp_Tight_);
   tree->Branch("eleIDSFDown_Tight",    &eleIDSFDown_Tight_);
-  
-
-  if (development_) {
-    tree->Branch("eleESEnP1Raw",              &eleESEnP1Raw_);
-    tree->Branch("eleESEnP2Raw",              &eleESEnP2Raw_);
-    tree->Branch("eleESEnEta",                &eleESEnEta_);
-    tree->Branch("eleESEnPhi",                &eleESEnPhi_);
-    tree->Branch("eleESEnZ",                  &eleESEnZ_);
-    tree->Branch("eleESEnP",                  &eleESEnP_);
-    tree->Branch("eleESEnX",                  &eleESEnX_);
-    tree->Branch("eleESEnY",                  &eleESEnY_);
-    tree->Branch("eleESEnS",                  &eleESEnS_);
-    tree->Branch("eleESEnE",                  &eleESEnE_);
-    tree->Branch("nGSFTrk",                   &nGSFTrk_);
-    tree->Branch("gsfPt",                     &gsfPt_);
-    tree->Branch("gsfEta",                    &gsfEta_);
-    tree->Branch("gsfPhi",                    &gsfPhi_);
-  }
+    
   }
   
 }
@@ -185,16 +152,6 @@ void ggNtuplizer::fillElectrons(const edm::Event &e, const edm::EventSetup &es, 
   eleEcalEn_                  .clear();
   eleESEnP1_                  .clear();
   eleESEnP2_                  .clear();
-  eleESEnP1Raw_               .clear();
-  eleESEnP2Raw_               .clear();
-  eleESEnEta_                 .clear();
-  eleESEnPhi_                 .clear();
-  eleESEnE_                   .clear();
-  eleESEnZ_                   .clear();
-  eleESEnP_                   .clear();
-  eleESEnX_                   .clear();
-  eleESEnY_                   .clear();
-  eleESEnS_                   .clear();
   eleD0_                      .clear();
   eleDz_                      .clear();
   eleSIP_                     .clear();
@@ -327,15 +284,11 @@ void ggNtuplizer::fillElectrons(const edm::Event &e, const edm::EventSetup &es, 
 	int seedGain = EGMCorrectionManager::GetSeedGain(seedDetId, e, ebReducedRecHitCollection_, eeReducedRecHitCollection_);
 	int run = isData_ ? e.id().run() : 1;
 	double randomNum = isData_ ? 0.0 : normalDistribution_(randomGenerator_);
-	std::cout<<__LINE__<<std::endl;
 	double correctedPt = egmCorrectionManager_->applyCorrectedElectronPt(originalPt, run, scEta, r9, seedGain, isData_, randomNum);
 	eleTrkEnergyPostCorr_.push_back(correctedPt);
-	std::cout<<__LINE__<<std::endl;
 	if (isData_) {
 	  double scale = egmCorrectionManager_->getElectronScale(run, scEta, r9, originalPt, seedGain);
-	  std::cout<<__LINE__<<std::endl;
 	  double scaleUnc = egmCorrectionManager_->getElectronScaleUnc(originalPt, r9, std::abs(scEta));
-   	  std::cout<<__LINE__<<std::endl;
 	  eleenergyScaleValue_.push_back(scale);
 	  eleScale_unc_up_.push_back(scale + scaleUnc);
 	  eleScale_unc_dn_.push_back(scale - scaleUnc);
@@ -343,7 +296,6 @@ void ggNtuplizer::fillElectrons(const edm::Event &e, const edm::EventSetup &es, 
 	  eleenergySigmaValue_.push_back(0.0); // No smearing for data
 	  eleSigma_unc_up_.push_back(0.0);
 	  eleSigma_unc_dn_.push_back(0.0);
-	  std::cout<<__LINE__<<std::endl;
 	} else {
           double smear = egmCorrectionManager_->getElectronSmear(originalPt, r9, std::abs(scEta));
           double smearUnc = egmCorrectionManager_->getElectronSmearUnc(originalPt, r9, std::abs(scEta));
@@ -356,7 +308,6 @@ void ggNtuplizer::fillElectrons(const edm::Event &e, const edm::EventSetup &es, 
 	  eleSigma_unc_up_.push_back(smear + smearUnc);
           eleSigma_unc_dn_.push_back(smear - smearUnc);
 	}
-  std::cout<<__LINE__<<std::endl;
     //store SF and SF unc
     double pt = iEle->pt();
     double eta = iEle->eta();
@@ -377,7 +328,6 @@ void ggNtuplizer::fillElectrons(const edm::Event &e, const edm::EventSetup &es, 
       eleGSFChi2_.push_back(999.);
       eleTrkdxy_.push_back(-999);
     }
-    std::cout<<__LINE__<<std::endl;
     reco::TrackRef kfTrackRef = iEle->closestCtfTrackRef();
     if (kfTrackRef.isAvailable() && kfTrackRef.isNonnull()) {
       eleKFHits_.push_back(kfTrackRef->hitPattern().trackerLayersWithMeasurement());
@@ -386,48 +336,7 @@ void ggNtuplizer::fillElectrons(const edm::Event &e, const edm::EventSetup &es, 
       eleKFHits_.push_back(-1.);
       eleKFChi2_.push_back(999.);
     }
-
-    if (development_) {
-
-      Float_t ESp1 = 0;
-      Float_t ESp2 = 0;
-      vector<float> ESEta; 
-      vector<float> ESPhi;
-      vector<int>   ESZ;
-      vector<int>   ESP;
-      vector<int>   ESX;
-      vector<int>   ESY;
-      vector<int>   ESS;
-      vector<float> ESE;
-      for (CaloClusterPtrVector::const_iterator ips = iEle->superCluster()->preshowerClustersBegin(); ips != iEle->superCluster()->preshowerClustersEnd(); ++ips) {
-
-	ESDetId esid = ESDetId((*ips)->seed());
-	if (esid.plane() == 1) ESp1 += (*ips)->energy();
-	if (esid.plane() == 2) ESp2 += (*ips)->energy();
-
-	ESZ.push_back(esid.zside());
-	ESP.push_back(esid.plane());
-	ESX.push_back(esid.six());
-	ESY.push_back(esid.siy());
-	ESS.push_back(esid.strip());
-
-	ESEta.push_back((*ips)->eta());
-	ESPhi.push_back((*ips)->phi());
-	ESE.push_back((*ips)->energy());
-      }
-
-      eleESEnP1Raw_.push_back(ESp1);
-      eleESEnP2Raw_.push_back(ESp2);
-      eleESEnEta_.push_back(ESEta);
-      eleESEnPhi_.push_back(ESPhi);
-      eleESEnZ_.push_back(ESZ);
-      eleESEnP_.push_back(ESP);
-      eleESEnX_.push_back(ESX);
-      eleESEnY_.push_back(ESY);
-      eleESEnS_.push_back(ESS);
-      eleESEnE_.push_back(ESE);
-    }
-    std::cout<<__LINE__<<std::endl;
+    
     // VID decisions 
     UShort_t tmpeleIDbit = 0;  
     bool isPassVeto = iEle->electronID("cutBasedElectronID-RunIIIWinter22-V1-veto");
@@ -453,25 +362,7 @@ void ggNtuplizer::fillElectrons(const edm::Event &e, const edm::EventSetup &es, 
     nEle_++;
   }
 
-  if (development_) {
-    
-    edm::Handle<edm::View<reco::GsfTrack> > GsfTrackHandle;
-    e.getByToken(gsfTracks_, GsfTrackHandle);
-    
-    nGSFTrk_ = 0;
-    gsfPt_ .clear();
-    gsfEta_.clear();
-    gsfPhi_.clear();
-    
-    for (edm::View<reco::GsfTrack>::const_iterator ig = GsfTrackHandle->begin(); ig != GsfTrackHandle->end(); ++ig) {
-      gsfPt_ .push_back(ig->pt());
-      gsfEta_.push_back(ig->eta());
-      gsfPhi_.push_back(ig->phi());
-      nGSFTrk_++;
-    }
-    std::cout<<__LINE__<<std::endl;
-  }
+  std::cout<<"****************ElectronEnd***************************"<<std::endl;
   
-
   }
 }

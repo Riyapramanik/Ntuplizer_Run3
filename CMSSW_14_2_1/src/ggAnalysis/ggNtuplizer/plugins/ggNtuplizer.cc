@@ -15,9 +15,7 @@ ggNtuplizer::ggNtuplizer(const edm::ParameterSet& ps) :
   caloTop(esConsumes()),
   randomGenerator_(12345),normalDistribution_(0.0, 1.0)
 {
-  std::cout << "DEBUG: ggNtuplizer constructor called!" << std::endl;
-
-  development_               = ps.getParameter<bool>("development");
+  
   addFilterInfoMINIAOD_      = ps.getParameter<bool>("addFilterInfoMINIAOD");
   doGenParticles_            = ps.getParameter<bool>("doGenParticles");
   runOnParticleGun_          = ps.getParameter<bool>("runOnParticleGun");
@@ -26,8 +24,6 @@ ggNtuplizer::ggNtuplizer(const edm::ParameterSet& ps) :
   dumpPFPhotons_             = ps.getParameter<bool>("dumpPFPhotons");
   dumpPDFSystWeight_         = ps.getParameter<bool>("dumpPDFSystWeight");
   year_                      = ps.getParameter<int>("year");
-
-  std::cout << "DEBUG: Basic parameters OK" << std::endl;
   
   vtxLabel_                  = consumes<reco::VertexCollection>        (ps.getParameter<InputTag>("VtxLabel"));
   rhoLabel_                  = consumes<double>                        (ps.getParameter<InputTag>("rhoLabel"));
@@ -48,9 +44,6 @@ ggNtuplizer::ggNtuplizer(const edm::ParameterSet& ps) :
   pckPFCandidateCollection_  = consumes<pat::PackedCandidateCollection>(ps.getParameter<InputTag>("packedPFCands"));
   pckPFCdsLabel_             = consumes<vector<pat::PackedCandidate>>  (ps.getParameter<InputTag>("packedPFCands"));
   recoCdsLabel_              = consumes<View<reco::Candidate>>         (ps.getParameter<InputTag>("packedPFCands"));
-
-  std::cout << "DEBUG: Input tags OK" << std::endl;
-
   
   // Added by me
   tok_pfjetAK4s_ = consumes<edm::View<pat::Jet>>(ps.getParameter<edm::InputTag>("PFJetsAK4"));
@@ -65,15 +58,13 @@ ggNtuplizer::ggNtuplizer(const edm::ParameterSet& ps) :
   isUltraLegacy = ps.getUntrackedParameter<bool>("UltraLegacy", false);
   tok_muons_ = consumes<edm::View<pat::Muon>> ( ps.getParameter<edm::InputTag>("Muons"));
   mJetVetoMap = ps.getParameter<std::string>("JetVetoMap");
-  
-  store_electron_scalnsmear = ps.getUntrackedParameter<bool>("store_electron_scalnsmear", false);
+ 
   store_electrons = ps.getUntrackedParameter<bool>("store_electrons", false);
   store_muons = ps.getUntrackedParameter<bool>("store_muons", false);
   store_photons = ps.getUntrackedParameter<bool>("store_photons", false);
   store_ak4jets = ps.getUntrackedParameter<bool>("store_ak4jets", false);
   store_CHS_met   = ps.getUntrackedParameter<bool>("store_CHS_met", false);
   store_PUPPI_met = ps.getUntrackedParameter<bool>("store_PUPPI_met", false);
-  store_electron_idSF      = ps.getUntrackedParameter<bool>("store_electron_idSF", false);
      
   //Scale and Smearing for electron and photon
   dataYear_ = ps.getParameter<int>("dataYear");
@@ -91,8 +82,6 @@ ggNtuplizer::ggNtuplizer(const edm::ParameterSet& ps) :
   triggerBits_ = consumes<edm::TriggerResults> ( ps.getParameter<edm::InputTag>("bits"));
   triggerObjects_ = consumes<pat::TriggerObjectStandAloneCollection>(ps.getParameter<edm::InputTag>("TriggerObjects"));
   triggerPrescales_ = consumes<pat::PackedTriggerPrescales>(ps.getParameter<edm::InputTag>("prescales"));
-
-  std::cout << "DEBUG: Generator input tags OK" << std::endl;
   
   //JEC and JER Files
 
@@ -104,35 +93,25 @@ ggNtuplizer::ggNtuplizer(const edm::ParameterSet& ps) :
 
   mPtResoFileAK4           = ps.getParameter<std::string>("PtResoFileAK4");
   mPtSFFileAK4             = ps.getParameter<std::string>("PtSFFileAK4");
-
-  std::cout << "JEC and JER Files"<< std::endl;
   
   Service<TFileService> fs;
   tree_    = fs->make<TTree>("EventTree", "Event data");
-  std::cout << "tree_"<< std::endl;
   hEvents_ = fs->make<TH1F>("hEvents","total processed and skimmed events",   2,  0,   2);
-  std::cout << "hEvents_"<< std::endl;
-
+ 
   branchesGlobalEvent(tree_);
-  std::cout << "branchesGlobalEvent"<< std::endl;
-
   
   if (doGenParticles_) {
     branchesGenInfo(tree_, fs);
     std::cout << "branchesGenInfo"<< std::endl;
     branchesGenPart(tree_);
     } 
-  
-  std::cout << "Gen particle "<< std::endl;
- 
+   
   branchesPhotons(tree_);
   branchesElectrons(tree_);
   branchesAK4PUPPIJets(tree_);
   branchesMET(tree_);
   branchesMuons(tree_);
-  
-  std::cout << "leaving ggNtuplizer constructor"<<std::endl;
-  
+   
 }
 
 ggNtuplizer::~ggNtuplizer() {
@@ -140,6 +119,20 @@ ggNtuplizer::~ggNtuplizer() {
 }
 
 //Initializing JER and JEC files
+
+static const int nsrc = 24;
+const char* jecsrcnames[nsrc] = {
+  "AbsoluteStat", "AbsoluteScale","AbsoluteMPFBias", 
+  "FlavorQCD", "Fragmentation", 
+  "PileUpDataMC",  "PileUpPtBB", "PileUpPtEC1", "PileUpPtEC2",
+  "PileUpPtRef",
+  "RelativeFSR", "RelativeJEREC1", "RelativeJEREC2",
+  "RelativePtBB", "RelativePtEC1", "RelativePtEC2", 
+  "RelativeBal", "RelativeSample", "RelativeStatEC", "RelativeStatFSR", 
+  "SinglePionECAL", "SinglePionHCAL","TimePtEta",
+  "Total"
+};
+const int njecmcmx = 2*nsrc + 1;
 
 void ggNtuplizer::beginJob() {
   std::cout << "DEBUG: ggNtuplizer beginJob() called!" << std::endl;
@@ -159,6 +152,21 @@ void ggNtuplizer::beginJob() {
   jecL3AbsoluteAK4   = new FactorizedJetCorrector(vecL3AbsoluteAK4);
   jecL2L3ResidualAK4 = new FactorizedJetCorrector(vecL2L3ResidualAK4);
 
+  std::cout << "Initializing JES uncertainty sources from: " << mJECUncFileAK4 << std::endl;
+  
+  for (int isrc = 0; isrc < nsrc; isrc++) {
+    const char *name = jecsrcnames[isrc];
+    std::cout << "Loading uncertainty source " << isrc << ": " << name << std::endl;
+    JetCorrectorParameters *pAK4 = new JetCorrectorParameters(mJECUncFileAK4.c_str(), name);
+    JetCorrectionUncertainty *uncAK4 = new JetCorrectionUncertainty(*pAK4);
+    vsrc.push_back(uncAK4);
+  }
+
+  //Jet veto map
+  file_jetvetomap = new TFile(mJetVetoMap.c_str(), "read");
+  h_jetvetomap = (TH2D*)file_jetvetomap->Get("jetvetomap");
+  h_jetvetomap_eep = (TH2D*)file_jetvetomap->Get("jetvetomap_eep");
+  
   //scale and smearing for electron and photon          
    if (applyEGMCorrections_) {
      std::cout << "DEBUG: Attempting to initialize EGMCorrectionManager with:" << std::endl;
@@ -170,14 +178,10 @@ void ggNtuplizer::beginJob() {
    }
 
 	egmIDSFManager_ = std::make_unique<EGMIDSFManager>(dataYear_, dataPeriod_);
-
-	std::cout << "DEBUG: ggNtuplizer beginJob() completed successfully!" << std::endl;
    
 }
 
 void ggNtuplizer::analyze(const edm::Event& e, const edm::EventSetup& es) {
-  std::cout << "=== ANALYZE FUNCTION CALLED FOR EVENT "<< " ===" << std::endl;
-  std::cout << "DEBUG: ggNtuplizer analyze() called for event " << e.id() << std::endl;
 
   hEvents_->Fill(0.5);
   
@@ -234,6 +238,12 @@ void ggNtuplizer::endJob() {
     if (L2RelativeAK4) delete L2RelativeAK4;
     if (L3AbsoluteAK4) delete L3AbsoluteAK4;
     if (L2L3ResidualAK4) delete L2L3ResidualAK4;
+
+    if (file_jetvetomap) {
+    file_jetvetomap->Close();
+    delete file_jetvetomap;
+    file_jetvetomap = nullptr;
+  }
     
 }
 

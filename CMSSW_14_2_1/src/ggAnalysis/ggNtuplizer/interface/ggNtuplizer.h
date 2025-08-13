@@ -92,8 +92,7 @@ class ggNtuplizer : public edm::one::EDAnalyzer<edm::one::SharedResources> {
   
   void branchesAK4PUPPIJets(TTree* tree);
   void fillAK4PUPPIJets(const edm::Event& e, const edm::EventSetup& es);
-  
-  bool development_;
+ 
   bool addFilterInfoMINIAOD_;  
   bool doGenParticles_;
   bool runOnParticleGun_;
@@ -146,22 +145,19 @@ class ggNtuplizer : public edm::one::EDAnalyzer<edm::one::SharedResources> {
   edm::EDGetTokenT<double> tok_Rho_;
   edm::EDGetTokenT<reco::GenJetCollection>tok_genjetAK4s_;
   edm::EDGetTokenT<edm::View<pat::Muon>> tok_muons_;
-  std::vector<JetCorrectionUncertainty*> vsrc;
+
   string year;
   bool isData;
   bool isMC;
   bool isRun3;
   bool isUltraLegacy;
-  bool store_electron_scalnsmear;
-  bool store_electrons, store_muons, store_photons, store_ak4jets, store_CHS_met, store_PUPPI_met, store_electron_idSF;
+  bool store_electrons, store_muons, store_photons, store_ak4jets, store_CHS_met, store_PUPPI_met;
 
   edm::EDGetTokenT<pat::TriggerObjectStandAloneCollection> triggerObjects_;
   edm::EDGetTokenT<pat::PackedTriggerPrescales> triggerPrescales_;
   std::unique_ptr<EGMCorrectionManager> egmCorrectionManager_;
   // ID Scale Factor Manager
   std::unique_ptr<EGMIDSFManager> egmIDSFManager_;
-  
-  std::string mJetVetoMap;
   
   TTree   *tree_;
   TH1F    *hEvents_;
@@ -185,6 +181,13 @@ class ggNtuplizer : public edm::one::EDAnalyzer<edm::one::SharedResources> {
   JetCorrectorParameters *L1FastAK4, *L2RelativeAK4, *L3AbsoluteAK4, *L2L3ResidualAK4;
   vector<JetCorrectorParameters> vecL1FastAK4, vecL2RelativeAK4, vecL3AbsoluteAK4, vecL2L3ResidualAK4;
   FactorizedJetCorrector *jecL1FastAK4, *jecL2RelativeAK4, *jecL3AbsoluteAK4, *jecL2L3ResidualAK4;
+  std::vector<JetCorrectionUncertainty*> vsrc;
+
+  //Jet veto flag
+  std::string mJetVetoMap;
+  TFile* file_jetvetomap;
+  TH2D* h_jetvetomap;
+  TH2D* h_jetvetomap_eep;
 
 };
 #endif

@@ -85,6 +85,9 @@ void ggNtuplizer::branchesMuons(TTree* tree) {
 }
 
 void ggNtuplizer::fillMuons(const edm::Event& e, math::XYZPoint& pv, reco::Vertex vtx) {
+
+std::cout<<"*****************Started Muon***********************"<<std::endl;
+
   if(store_muons){
   // cleanup from previous execution
   muPt_                  .clear();
@@ -241,5 +244,7 @@ void ggNtuplizer::fillMuons(const edm::Event& e, math::XYZPoint& pv, reco::Verte
     nMu_++;
   }
   }
+
+  std::cout<<"*****************END muon***********************"<<std::endl;
 
 }
