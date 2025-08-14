@@ -24,6 +24,7 @@ ggNtuplizer::ggNtuplizer(const edm::ParameterSet& ps) :
   dumpPFPhotons_             = ps.getParameter<bool>("dumpPFPhotons");
   dumpPDFSystWeight_         = ps.getParameter<bool>("dumpPDFSystWeight");
   year_                      = ps.getParameter<int>("year");
+
   
   vtxLabel_                  = consumes<reco::VertexCollection>        (ps.getParameter<InputTag>("VtxLabel"));
   rhoLabel_                  = consumes<double>                        (ps.getParameter<InputTag>("rhoLabel"));
@@ -51,7 +52,7 @@ ggNtuplizer::ggNtuplizer(const edm::ParameterSet& ps) :
   tok_Rho_ = consumes<double>(ps.getParameter<InputTag>("PFRho"));
   min_pt_AK4jet = ps.getUntrackedParameter<double>("minJetPt", 25.);
   max_eta = ps.getUntrackedParameter<double>("maxEta",3.);
-  year		=  ps.getUntrackedParameter<string>("YEAR","2018");
+  year		=  ps.getUntrackedParameter<string>("YEAR","2022");
   isData    = ps.getUntrackedParameter<bool>("Data",false);
   isMC      = ps.getUntrackedParameter<bool>("MonteCarlo", false);
   isRun3 	= ps.getUntrackedParameter<bool>("isRun3", false);

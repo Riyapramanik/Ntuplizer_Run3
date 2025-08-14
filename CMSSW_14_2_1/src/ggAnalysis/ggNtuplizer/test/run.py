@@ -98,7 +98,7 @@ else:
 #! Can make it as argument
 #!!!!!!!!!!!!!!
 process.GlobalTag = GlobalTag(process.GlobalTag, '130X_dataRun3_v2')
-process.maxEvents = cms.untracked.PSet(input=cms.untracked.int32(100))
+process.maxEvents = cms.untracked.PSet(input=cms.untracked.int32(-1))
 process.MessageLogger.cerr.FwkReport.reportEvery = 5000
 process.source = cms.Source("PoolSource", fileNames = cms.untracked.vstring('/store/data/Run2022C/EGamma/MINIAOD/22Sep2023-v1/50000/6015928f-0763-4e7f-9d48-ff0f2ddaf12e.root'))
 #process.source = cms.Source("PoolSource", fileNames = cms.untracked.vstring('/store/mc/Run3Summer22EEMiniAODv4/ZGto2NuG-1Jets_PTG-100to200_TuneCP5_13p6TeV_amcatnloFXFX-pythia8/MINIAODSIM/130X_mcRun3_2022_realistic_postEE_v6-v3/2560000/0adadef6-3fb4-453d-ae24-6bc79b4338cb.root'))
