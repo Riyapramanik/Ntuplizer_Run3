@@ -40,7 +40,7 @@ vector<float>  phoIDMVA_;
 vector<float>  phoSeedTime_;
 vector<float>  phoSeedEnergy_;
 vector<float>  phoMIPTotEnergy_;
-vector<float>  phoSeedTimeFull5x5_;
+//vector<float>  phoSeedTimeFull5x5_;
 vector<float>  phoMIPChi2_;
 vector<float>  phoMIPSlope_;
 vector<float>  phoMIPIntercept_;
@@ -153,7 +153,7 @@ void ggNtuplizer::branchesPhotons(TTree* tree) {
   tree->Branch("phoTrkSumPtHollowConeDR04", &phoTrkSumPtHollowConeDR04_);
   tree->Branch("phoECALIso",                &phoECALIso_);
   tree->Branch("phoHCALIso",                &phoHCALIso_);
-  tree->Branch("phoSeedTimeFull5x5",              &phoSeedTimeFull5x5_);
+  //tree->Branch("phoSeedTimeFull5x5",              &phoSeedTimeFull5x5_);
   tree->Branch("phoMIPChi2",                      &phoMIPChi2_);
   tree->Branch("phoMIPSlope",                     &phoMIPSlope_);
   tree->Branch("phoMIPIntercept",                 &phoMIPIntercept_);
@@ -247,7 +247,7 @@ void ggNtuplizer::fillPhotons(const edm::Event& e, const edm::EventSetup& es) {
   phoECALIso_                     . clear();
   phoHCALIso_                     . clear();
 	
-  phoSeedTimeFull5x5_   .clear();
+  //phoSeedTimeFull5x5_   .clear();
   phoMIPChi2_           .clear();
   phoMIPSlope_          .clear();
   phoMIPIntercept_      .clear();
@@ -291,11 +291,10 @@ void ggNtuplizer::fillPhotons(const edm::Event& e, const edm::EventSetup& es) {
   edm::Handle<edm::View<pat::Photon> > photonHandle;
   e.getByToken(photonCollection_, photonHandle);
 
-  if (!photonHandle.isValid()) {
-    edm::LogWarning("ggNtuplizer") << "no pat::Photons in event";
-    return;
-  }
+  if (photonHandle.isValid()) {
 
+    std::cout<<"*****************Started Photon***********************"<<std::endl;
+    
   //edm::Handle<reco::PhotonCollection> recoPhotonHandle;
   //e.getByToken(recophotonCollection_, recoPhotonHandle);
 
@@ -304,14 +303,14 @@ void ggNtuplizer::fillPhotons(const edm::Event& e, const edm::EventSetup& es) {
 
   edm::Handle<EcalRecHitCollection> RecHitsEE;
   e.getByToken(eeReducedRecHitCollection_, RecHitsEE);
-  
+  std::cout<<__LINE__<<std::endl;
   CaloTopology const *p_topology = &es.getData(caloTop);  // get calo topology
   const EcalRecHitCollection *ebRecHits = RecHitsEB.product();
   const EcalRecHitCollection *eeRecHits = RecHitsEE.product();
-  
+  std::cout<<__LINE__<<std::endl;
   EcalClusterLazyTools       lazyTool    (e, ecalClusterToolsESGetTokens_.get(es), ebReducedRecHitCollection_, eeReducedRecHitCollection_, esReducedRecHitCollection_);
   noZS::EcalClusterLazyTools lazyToolnoZS(e, ecalClusterToolsESGetTokens_.get(es), ebReducedRecHitCollection_, eeReducedRecHitCollection_, esReducedRecHitCollection_);
-
+  std::cout<<__LINE__<<std::endl;
   if(store_photons){
   for (edm::View<pat::Photon>::const_iterator iPho = photonHandle->begin(); iPho != photonHandle->end(); ++iPho) {
 
@@ -372,6 +371,7 @@ void ggNtuplizer::fillPhotons(const edm::Event& e, const edm::EventSetup& es) {
     
     phoHaloTaggerMVAVal_       .push_back(iPho->haloTaggerMVAVal());
 
+    std::cout<<__LINE__<<std::endl;
 
     //For scale and smearing
     float originalPt = iPho->pt();
@@ -407,7 +407,7 @@ void ggNtuplizer::fillPhotons(const edm::Event& e, const edm::EventSetup& es) {
       phoSigma_unc_up_.push_back(smear + smearUnc);
       phoSigma_unc_dn_.push_back(smear - smearUnc);
       }
-    
+    std::cout<<__LINE__<<std::endl;
     double pt = iPho->pt();
     double eta = iPho->eta();
     double phi = iPho->phi();
@@ -422,7 +422,7 @@ void ggNtuplizer::fillPhotons(const edm::Event& e, const edm::EventSetup& es) {
     
     // VID decisions     
     UShort_t tmpphoIDbit = 0;
-    
+    std::cout<<__LINE__<<std::endl;
     ///Run 3
     bool isPassLoose  = iPho->photonID("cutBasedPhotonID-RunIIIWinter22-122X-V1-loose");
     if (isPassLoose)  setbit(tmpphoIDbit, 0);   
@@ -432,21 +432,26 @@ void ggNtuplizer::fillPhotons(const edm::Event& e, const edm::EventSetup& es) {
     if (isPassTight)  setbit(tmpphoIDbit, 2);
 
     phoIDbit_.push_back(tmpphoIDbit);
-    
+    std::cout<<__LINE__<<std::endl;
     DetId seed = (iPho->superCluster()->seed()->hitsAndFractions())[0].first;
-    bool isBarrel = seed.subdetId() == EcalBarrel; 
+    bool isBarrel = seed.subdetId() == EcalBarrel;
+    std::cout<<__LINE__<<std::endl;
+    
     //For Run3
     const EcalRecHitCollection* rechits = isBarrel ? ebRecHits : eeRecHits;
     EcalRecHitCollection::const_iterator theSeedHit = rechits->find(seed);
     if (theSeedHit != rechits->end()) {
 
       phoSeedTime_  .push_back((*theSeedHit).time());
+
+      std::cout<<"seed time from rechhits "<<(*theSeedHit).time()<<std::endl;
+      
       phoSeedEnergy_.push_back((*theSeedHit).energy());
     } else{
       phoSeedTime_  .push_back(-99.);
       phoSeedEnergy_.push_back(-99.);
     }
-    
+    std::cout<<__LINE__<<std::endl;
     const auto &vCov  = (isBarrel?EcalClusterTools::localCovariances(*((*iPho).superCluster()->seed()), ebRecHits,  p_topology) : EcalClusterTools::localCovariances(*((*iPho).superCluster()->seed()), eeRecHits,  p_topology));
     
     const float spp = (isnan(vCov[2]) ? 0. : sqrt(vCov[2]));
@@ -459,21 +464,26 @@ void ggNtuplizer::fillPhotons(const edm::Event& e, const edm::EventSetup& es) {
     phoE5x5Full5x5_          .push_back(iPho->full5x5_e5x5());
     phoR9Full5x5_            .push_back(iPho->full5x5_r9());
     phoMIPTotEnergy_         .push_back(iPho->mipTotEnergy());
-
+    std::cout<<__LINE__<<std::endl;
     phoSeedBCE_        .push_back((*iPho).superCluster()->seed()->energy());
     phoSeedBCEta_      .push_back((*iPho).superCluster()->seed()->eta());
-
-    phoSeedTimeFull5x5_.push_back(lazyToolnoZS.SuperClusterSeedTime(*((*iPho).superCluster())));
+    std::cout<<__LINE__<<std::endl;
+    //phoSeedTimeFull5x5_.push_back(lazyToolnoZS.SuperClusterSeedTime(*((*iPho).superCluster())));
+    //std::cout<<"seed time from supercluster "<<lazyToolnoZS.SuperClusterSeedTime(*((*iPho).superCluster()))<<std::endl;
+    std::cout<<__LINE__<<std::endl;
     phoMIPChi2_        .push_back(iPho->mipChi2());
     phoMIPSlope_       .push_back(iPho->mipSlope());
+    std::cout<<__LINE__<<std::endl;
     phoMIPIntercept_   .push_back(iPho->mipIntercept());
+    std::cout<<__LINE__<<std::endl;
     phoMIPNhitCone_    .push_back(iPho->mipNhitCone());
     phoMIPIsHalo_      .push_back(iPho->mipIsHalo());
     nPho_++;
   }
-  std::cout<<"*****************Photon*********"<<std::endl;
   }
-  
+  std::cout<<__LINE__<<std::endl;
+  }
+  std::cout<<"*****************End Photon***********************"<<std::endl;
 
 }
 

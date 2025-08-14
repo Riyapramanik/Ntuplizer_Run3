@@ -4,13 +4,7 @@ using namespace std;
 
 bool getJetID(JetIDVars vars, std::string jettype, std::string year, double eta, bool tightLepVeto, bool UltraLegacy, bool isRun3)
 {
- std::cout<<"JetIDTools.cc"<<std::endl;
   //https://twiki.cern.ch/twiki/bin/viewauth/CMS/JetID
-  
-  if (jettype!="CHS" && jettype!="PUPPI"){
-    cout<<"Don't know your jet type! I know only CHS & PUPPI :D"<<endl;
-    return false;
-  }
   
   float NHF, NEMF, MUF, CHF, CEMF;
   int NumConst, NumNeutralParticle, CHM;

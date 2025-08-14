@@ -208,22 +208,19 @@ void ggNtuplizer::fillElectrons(const edm::Event &e, const edm::EventSetup &es, 
   
   nEle_ = 0;
 
-  std::cout<<"*****Electron begin**************"<<std::endl;
-
   edm::Handle<edm::View<pat::Electron> > electronHandle;
   e.getByToken(electronCollection_, electronHandle);
 
   edm::Handle<pat::PackedCandidateCollection> pfcands;
   e.getByToken(pckPFCandidateCollection_, pfcands);
 
-  if (!electronHandle.isValid()) {
-    edm::LogWarning("ggNtuplizer") << "no pat::Electrons in event";
-    return;
-  }
+  if (electronHandle.isValid()) {
 
   edm::Handle<reco::VertexCollection> recVtxs;
   e.getByToken(vtxLabel_, recVtxs);
 
+  std::cout<<"*****************Started Electron***********************"<<std::endl;
+  
   EcalClusterLazyTools       lazyTool    (e, ecalClusterToolsESGetTokens_.get(es), ebReducedRecHitCollection_, eeReducedRecHitCollection_, esReducedRecHitCollection_);
   noZS::EcalClusterLazyTools lazyToolnoZS(e, ecalClusterToolsESGetTokens_.get(es), ebReducedRecHitCollection_, eeReducedRecHitCollection_, esReducedRecHitCollection_);
 
@@ -361,8 +358,10 @@ void ggNtuplizer::fillElectrons(const edm::Event &e, const edm::EventSetup &es, 
 
     nEle_++;
   }
-
-  std::cout<<"****************ElectronEnd***************************"<<std::endl;
+ 
+  }
   
   }
+
+  std::cout<<"*****************End Electron***********************"<<std::endl;
 }

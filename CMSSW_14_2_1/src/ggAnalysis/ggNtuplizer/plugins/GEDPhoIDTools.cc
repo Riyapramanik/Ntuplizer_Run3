@@ -9,8 +9,6 @@
 #include "ggAnalysis/ggNtuplizer/interface/GEDPhoIDTools.h"
 
 bool GEDPhoIDTools::CutBasedID(WP wp, bool UsedefaultCuts=true){
-
-  std::cout<<"GEDPhoIDTools.cc"<<std::endl;
   
     if(UsedefaultCuts)defaultCuts();
     bool passID=false;

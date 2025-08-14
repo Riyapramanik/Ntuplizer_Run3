@@ -33,11 +33,9 @@ vector<float>     AK4PUPPIJet_NEF_;
 vector<UShort_t>  AK4PUPPIJet_NNP_;
 vector<float>     AK4PUPPIJet_MUF_;
 
-vector<float>     AK4PUPPIJet_JECUnc_;
 vector<Float_t>   AK4PUPPIJet_JER_SF_;
 vector<Float_t>   AK4PUPPIJet_JER_SFup_;
 vector<Float_t>   AK4PUPPIJet_JER_SFdown_;
-vector<ULong64_t> AK4PUPPIJet_FiredTrgs_;
 //By me
 std::vector<float> PFJetAK4_JEC_;
 double min_pt_AK4jet;
@@ -239,11 +237,9 @@ void ggNtuplizer::branchesAK4PUPPIJets(TTree* tree) {
 	tree->Branch("AK4PUPPIJet_Mt",                        & AK4PUPPIJet_Mt_);
 	tree->Branch("AK4PUPPIJet_Area",                      & AK4PUPPIJet_Area_);
        
-	tree->Branch("AK4PUPPIJet_JECUnc",   & AK4PUPPIJet_JECUnc_);
 	tree->Branch("AK4PUPPIJet_JER_SF",     & AK4PUPPIJet_JER_SF_);
 	tree->Branch("AK4PUPPIJet_JER_SFup",   & AK4PUPPIJet_JER_SFup_);
 	tree->Branch("AK4PUPPIJet_JER_SFdown", & AK4PUPPIJet_JER_SFdown_);
-	tree->Branch("AK4PUPPIJet_FiredTrgs",  & AK4PUPPIJet_FiredTrgs_);
 	tree->Branch("AK4PUPPIJet_CHF",        & AK4PUPPIJet_CHF_);
 	tree->Branch("AK4PUPPIJet_NHF",        & AK4PUPPIJet_NHF_);
 	tree->Branch("AK4PUPPIJet_CEF",        & AK4PUPPIJet_CEF_);
@@ -327,11 +323,9 @@ void ggNtuplizer::fillAK4PUPPIJets(const edm::Event& e, const edm::EventSetup& e
 	AK4PUPPIJet_RawEn_                        . clear();
 	AK4PUPPIJet_Mt_                           . clear();
 	AK4PUPPIJet_Area_                         . clear();	
-	AK4PUPPIJet_JECUnc_                       . clear();
 	AK4PUPPIJet_JER_SF_                       . clear();
 	AK4PUPPIJet_JER_SFup_                     . clear();
 	AK4PUPPIJet_JER_SFdown_                   . clear();
-	AK4PUPPIJet_FiredTrgs_                    . clear();
 	AK4PUPPIJet_CHF_                          . clear();
 	AK4PUPPIJet_NHF_                          . clear();
 	AK4PUPPIJet_CEF_                          . clear();
@@ -403,15 +397,13 @@ void ggNtuplizer::fillAK4PUPPIJets(const edm::Event& e, const edm::EventSetup& e
 	charge_kappa_1p0_.clear();
 	charged_ptsum_.clear();
 	jetID_tightlepveto_.clear();
-
-	std::cout<<"***************************Started Jets************************"<<std::endl;
 	
 	edm::Handle<edm::View<pat::Jet>> pfjetAK4s;
 	e.getByToken(tok_pfjetAK4s_, pfjetAK4s);
 	if(pfjetAK4s.isValid() && store_ak4jets){
 	  for (edm::View<pat::Jet>::const_iterator iJet = pfjetAK4s->begin(); iJet != pfjetAK4s->end(); ++iJet) {
 	    const pat::Jet &ak4jet = *iJet;
-
+	    std::cout<<"*****************Started Jets***********************"<<std::endl;
 	    //Rho                                                                                                                                            
         edm::Handle<double> Rho_PF;
         e.getByToken(tok_Rho_,Rho_PF);
@@ -603,7 +595,7 @@ void ggNtuplizer::fillAK4PUPPIJets(const edm::Event& e, const edm::EventSetup& e
   
 	}
 
-	std::cout<<"*****************END Jets***********************"<<std::endl;
+	std::cout<<"*****************End Jets***********************"<<std::endl;
 }
 
 

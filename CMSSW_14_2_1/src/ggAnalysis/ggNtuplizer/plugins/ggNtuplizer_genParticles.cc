@@ -119,25 +119,19 @@ float getGenTrkIso(edm::Handle<reco::GenParticleCollection> handle,
 }
 
 void ggNtuplizer::branchesGenInfo(TTree* tree, edm::Service<TFileService> &fs) {
-  std::cout << "DEBUG: Starting branchesGenInfo" << std::endl;
   tree->Branch("pdf",           &pdf_);
   tree->Branch("pthat",         &pthat_);
   tree->Branch("processID",     &processID_);
   tree->Branch("genWeight",     &genWeight_);
   std::cout << "DEBUG: Basic gen branches OK" << std::endl;
   tree->Branch("genHT",         &genHT_);
-  std::cout << "DEBUG: Basic gen branches OK0" << std::endl;
   tree->Branch("genPho1",       &genPho1_);
-  std::cout << "DEBUG: Basic gen branches OK1" << std::endl;
   tree->Branch("genPho2",       &genPho2_);
   if (dumpPDFSystWeight_) {
     tree->Branch("pdfWeight",     &pdfWeight_);
-    std::cout << "DEBUG: Basic gen branches OK2" << std::endl;
     tree->Branch("pdfSystWeight", &pdfSystWeight_);
   }
-  std::cout << "DEBUG: Basic gen branches OK3" << std::endl;
   //tree->Branch("EventTag",      &EventTag_);
-  std::cout << "DEBUG: Basic gen branches OK4" << std::endl;
   tree->Branch("nPUInfo",       &nPUInfo_);
   tree->Branch("nPU",           &nPU_);
   tree->Branch("puBX",          &puBX_);
@@ -148,7 +142,6 @@ void ggNtuplizer::branchesGenInfo(TTree* tree, edm::Service<TFileService> &fs) {
   tree->Branch("lhePy",         &lhePy); 
   tree->Branch("lhePz",         &lhePz); 
   tree->Branch("lheE",          &lheE);
-  std::cout << "DEBUG: Basic gen branches OK5" << std::endl;
 
   hPU_        = fs->make<TH1F>("hPU",        "number of pileup",      200,  0, 200);
   hPUTrue_    = fs->make<TH1F>("hPUTrue",    "number of true pilepu", 1000, 0, 200);

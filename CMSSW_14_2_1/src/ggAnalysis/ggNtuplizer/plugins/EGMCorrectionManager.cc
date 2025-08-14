@@ -10,7 +10,6 @@ EGMCorrectionManager::EGMCorrectionManager(int year, const std::string& period)
 }
 
 void EGMCorrectionManager::initializeCorrections() {
-  std::cout << "DEBUG: initializeCorrections() started" << std::endl;
     std::string electronFile = getElectronJSONFile();
     std::string photonFile = getPhotonJSONFile();
     
@@ -24,7 +23,6 @@ void EGMCorrectionManager::initializeCorrections() {
 
 std::string EGMCorrectionManager::getElectronJSONFile() {
 
-  std::cout<<"======EGMCorrectionManager.cc========="<<std::endl;
   std::string basePath = "/eos/user/r/rpramani/run3_ntuplizer/CMSSW_14_2_1/src/ggAnalysis/ggNtuplizer/test/ElectronJson/";
   if (year_ == 2022){
     if (period_ == "B" || period_ == "C" || period_ == "D"){
@@ -141,7 +139,6 @@ double EGMCorrectionManager::getPhotonSmear(double pt, double r9, double scEta) 
 }
 
 double EGMCorrectionManager::getPhotonScaleUnc(double pt, double r9, double scEta) {
-  std::cout<<"getPhotonScaleUnc"<<std::endl;
   return photonSmearEvaluator_->evaluate({"escale", static_cast<double>(pt), static_cast<double>(r9), static_cast<double>(std::abs(scEta))});
 }
 
@@ -160,13 +157,9 @@ double EGMCorrectionManager::applyCorrectedElectronPt(double originalPt, int run
 }
 
 double EGMCorrectionManager::applyCorrectedPhotonPt(double originalPt, int run, double scEta, double r9, int seedGain, bool isData, double randomNum) {
-std::cout << "DEBUG: Inside applyCorrectedPhotonPt" << std::endl;
-    std::cout << "  isData=" << isData << std::endl;
 
   if (isData) {
-    std::cout << "DEBUG: About to call getPhotonScale" << std::endl;
         double scale = getPhotonScale(run, scEta, r9, originalPt, seedGain);
-	std::cout << "DEBUG: getPhotonScale returned: " << scale << std::endl;
         return scale * originalPt;
     } else {
         double smear = getPhotonSmear(originalPt, r9, std::abs(scEta));

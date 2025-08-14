@@ -93,8 +93,6 @@ if(store_CHS_met){
 }
 
 void ggNtuplizer::fillMET(const edm::Event& e, const edm::EventSetup& es) {
-
-  std::cout<<"*****************Started MET***********************"<<std::endl;
   
   //Initialize MET filter flags
   Flag_goodVertices_ = false;
@@ -114,15 +112,15 @@ void ggNtuplizer::fillMET(const edm::Event& e, const edm::EventSetup& es) {
   e.getByToken(tok_mets_,pfmet_) ;
   
   if(pfmet_.isValid()){
-    std::cout<<__LINE__<<std::endl;
+
+    std::cout<<"*****************Begin Met***********************"<<std::endl;
+    
     const pat::MET &met = pfmet_->front();
     
     miset = met.corPt(); //met.pt();
     misphi = met.corPhi();//met.phi();
     misetsig = met.metSignificance();
     sumEt = met.corSumEt();//sumEt();
-
-    std::cout<<__LINE__<<std::endl;
             
     miset_covXX = met.getSignificanceMatrix().At(0,0);
     miset_covXY = met.getSignificanceMatrix().At(0,1);
@@ -132,8 +130,6 @@ void ggNtuplizer::fillMET(const edm::Event& e, const edm::EventSetup& es) {
 	    
     miset_UnclusEup = met.shiftedPt(pat::MET::UnclusteredEnUp);  // met.shiftedPt(pat::MET::METUncertainty(10));
     miset_UnclusEdn = met.shiftedPt(pat::MET::UnclusteredEnDown);// met.shiftedPt(pat::MET::METUncertainty(11));
-
-    std::cout<<__LINE__<<std::endl;
 	
     misphi_UnclusEup = met.shiftedPhi(pat::MET::UnclusteredEnUp);  //(pat::MET::METUncertainty(10));
     misphi_UnclusEdn = met.shiftedPhi(pat::MET::UnclusteredEnDown);//(pat::MET::METUncertainty(11));
@@ -151,8 +147,6 @@ void ggNtuplizer::fillMET(const edm::Event& e, const edm::EventSetup& es) {
   if(pfmet_PUPPI_.isValid()){
     
     const pat::MET &met = pfmet_PUPPI_->front();
-
-    std::cout<<__LINE__<<std::endl;
     
     miset_PUPPI = met.corPt(); 
     misphi_PUPPI = met.corPhi();
@@ -163,7 +157,6 @@ void ggNtuplizer::fillMET(const edm::Event& e, const edm::EventSetup& es) {
     miset_PUPPI_covXY = met.getSignificanceMatrix().At(0,1);
     miset_PUPPI_covYY = met.getSignificanceMatrix().At(1,1);
     
-    std::cout<<__LINE__<<std::endl;
     //MET uncertainty numbering scheme: https://cmssdt.cern.ch/lxr/source/DataFormats/PatCandidates/interface/MET.h
     
     miset_PUPPI_JESup = met.shiftedPt(pat::MET::JetEnUp); //(pat::MET::METUncertainty(2));
@@ -172,8 +165,6 @@ void ggNtuplizer::fillMET(const edm::Event& e, const edm::EventSetup& es) {
     miset_PUPPI_JERdn = met.shiftedPt(pat::MET::JetResDown); //(pat::MET::METUncertainty(1));
     miset_PUPPI_UnclusEup = met.shiftedPt(pat::MET::UnclusteredEnUp);  //(pat::MET::METUncertainty(10));
     miset_PUPPI_UnclusEdn = met.shiftedPt(pat::MET::UnclusteredEnDown);//(pat::MET::METUncertainty(11));
-
-    std::cout<<__LINE__<<std::endl;
     
     misphi_PUPPI_JESup = met.shiftedPhi(pat::MET::JetEnUp); //(pat::MET::METUncertainty(2));
     misphi_PUPPI_JESdn = met.shiftedPhi(pat::MET::JetEnDown); //(pat::MET::METUncertainty(3));
@@ -187,8 +178,6 @@ void ggNtuplizer::fillMET(const edm::Event& e, const edm::EventSetup& es) {
   }
   
   }
-
-  std::cout<<__LINE__<<std::endl;
   
   //MET Filter
   edm::Handle<edm::TriggerResults> METFilterResults;
@@ -211,6 +200,5 @@ void ggNtuplizer::fillMET(const edm::Event& e, const edm::EventSetup& es) {
   // End of MET filters //
   }//(METFilterResults.isValid())
 
-std::cout<<"*****************END MET***********************"<<std::endl;
-
+std::cout<<"*****************End Met***********************"<<std::endl;
 }

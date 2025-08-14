@@ -11,8 +11,6 @@ EGMIDSFManager::EGMIDSFManager(int year, const std::string& period)
 
 
 void EGMIDSFManager::initializeCorrections() {
-
-  std::cout<<"======initializeCorrections========="<<std::endl;
   
     std::string electronIDFile = getElectronIDJSONFile();
     std::string photonIDFile = getPhotonIDJSONFile();
@@ -26,8 +24,7 @@ void EGMIDSFManager::initializeCorrections() {
 
 
 std::string EGMIDSFManager::getElectronIDJSONFile() {
-
-  std::cout<<"======EGMIDSFManager.cc========="<<std::endl;
+  
   std::string basePath = "/eos/user/r/rpramani/run3_ntuplizer/CMSSW_14_2_1/src/ggAnalysis/ggNtuplizer/test/ElectronJson/";
 
   if (year_ == 2022) {
@@ -79,8 +76,6 @@ void EGMIDSFManager::setupElectronIDEvaluators() {
     std::vector<std::string> idTypes = {
         "Loose", "Medium", "Tight", "wp80iso", "wp90iso"
     };
-
-    std::cout<<"****************setupElectronIDEvaluators*******"<<std::endl;
     
     std::string correctionName = "Electron-ID-SF";
     auto correctionRef = electronIDCorrectionSet_->at(correctionName);
@@ -93,12 +88,6 @@ void EGMIDSFManager::setupPhotonIDEvaluators() {
     std::vector<std::string> idTypes = {
         "Loose", "Medium", "Tight", "wp80", "wp90"
     };
-
-    std::cout<<"****************setupPhotonIDEvaluators*******"<<std::endl;
-    std::cout << "Available corrections in photon ID file:" << std::endl;
-    for (const auto& [name, corr] : *photonIDCorrectionSet_) {
-        std::cout << "  Available correction: " << name << std::endl;
-    }
     
     std::string correctionName = "Photon-ID-SF";
     auto correctionRef = photonIDCorrectionSet_->at(correctionName);
@@ -145,7 +134,6 @@ double EGMIDSFManager::getElectronIDSFUncDown(const std::string& idType, double 
 
 double EGMIDSFManager::getPhotonIDSF(const std::string& idType, double pt, double eta, double phi) {    
     std::string yearValue = getYearValue();
-    std::cout << "***getPhotonIDSF***"<<std::endl;
     return photonIDEvaluators_[idType]->evaluate({yearValue, "sf", idType, eta, pt});
 }
 

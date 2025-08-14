@@ -86,8 +86,6 @@ void ggNtuplizer::branchesMuons(TTree* tree) {
 
 void ggNtuplizer::fillMuons(const edm::Event& e, math::XYZPoint& pv, reco::Vertex vtx) {
 
-std::cout<<"*****************Started Muon***********************"<<std::endl;
-
   if(store_muons){
   // cleanup from previous execution
   muPt_                  .clear();
@@ -135,11 +133,8 @@ std::cout<<"*****************Started Muon***********************"<<std::endl;
   edm::Handle<pat::PackedCandidateCollection> pfcands;
   e.getByToken(pckPFCandidateCollection_, pfcands);
 
-  if (!muonHandle.isValid()) {
-    edm::LogWarning("ggNtuplizer") << "no pat::Muons in event";
-    return;
-  }
-
+  if (muonHandle.isValid()) {
+std::cout<<"*****************Started Muon***********************"<<std::endl;
   if(store_muons){
   for (edm::View<pat::Muon>::const_iterator iMu = muonHandle->begin(); iMu != muonHandle->end(); ++iMu) {
    
@@ -245,6 +240,8 @@ std::cout<<"*****************Started Muon***********************"<<std::endl;
   }
   }
 
-  std::cout<<"*****************END muon***********************"<<std::endl;
+  }
 
+  std::cout<<"*****************End Muon***********************"<<std::endl;
+  
 }

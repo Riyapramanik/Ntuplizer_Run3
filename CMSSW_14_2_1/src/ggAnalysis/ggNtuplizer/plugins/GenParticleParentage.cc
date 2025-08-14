@@ -13,9 +13,7 @@ GenParticleParentage(reco::GenParticleRef& _match) {
 }
 
 void GenParticleParentage::getParentageRecursive(const reco::GenParticleRef& p, int daughterId) {
-
-  std::cout<<" GenParticleParentage.cc "<<std::endl;
-  
+ 
   // stopping condition
   if( p->numberOfMothers() == 0 ) return; // no mothers
   //if( p->pt() < 0.1 ) return;  // reached initial state quarks/proton

@@ -102,7 +102,6 @@ ggNtuplizer::ggNtuplizer(const edm::ParameterSet& ps) :
   
   if (doGenParticles_) {
     branchesGenInfo(tree_, fs);
-    std::cout << "branchesGenInfo"<< std::endl;
     branchesGenPart(tree_);
     } 
    
@@ -135,7 +134,6 @@ const char* jecsrcnames[nsrc] = {
 const int njecmcmx = 2*nsrc + 1;
 
 void ggNtuplizer::beginJob() {
-  std::cout << "DEBUG: ggNtuplizer beginJob() called!" << std::endl;
   
   L1FastAK4       = new JetCorrectorParameters(mjecL1FastFileAK4.c_str());
   L2RelativeAK4   = new JetCorrectorParameters(mjecL2RelativeFileAK4.c_str());
@@ -151,12 +149,9 @@ void ggNtuplizer::beginJob() {
   jecL2RelativeAK4   = new FactorizedJetCorrector(vecL2RelativeAK4);
   jecL3AbsoluteAK4   = new FactorizedJetCorrector(vecL3AbsoluteAK4);
   jecL2L3ResidualAK4 = new FactorizedJetCorrector(vecL2L3ResidualAK4);
-
-  std::cout << "Initializing JES uncertainty sources from: " << mJECUncFileAK4 << std::endl;
   
   for (int isrc = 0; isrc < nsrc; isrc++) {
     const char *name = jecsrcnames[isrc];
-    std::cout << "Loading uncertainty source " << isrc << ": " << name << std::endl;
     JetCorrectorParameters *pAK4 = new JetCorrectorParameters(mJECUncFileAK4.c_str(), name);
     JetCorrectionUncertainty *uncAK4 = new JetCorrectionUncertainty(*pAK4);
     vsrc.push_back(uncAK4);
@@ -169,12 +164,9 @@ void ggNtuplizer::beginJob() {
   
   //scale and smearing for electron and photon          
    if (applyEGMCorrections_) {
-     std::cout << "DEBUG: Attempting to initialize EGMCorrectionManager with:" << std::endl;
-        std::cout << "  dataYear_: " << dataYear_ << std::endl;
-        std::cout << "  dataPeriod_: " << dataPeriod_ << std::endl;
-    
+     
 	egmCorrectionManager_ = std::make_unique<EGMCorrectionManager>(dataYear_, dataPeriod_);
-	std::cout<<"egmCorrectionManager_"<<std::endl;
+
    }
 
 	egmIDSFManager_ = std::make_unique<EGMIDSFManager>(dataYear_, dataPeriod_);
@@ -220,13 +212,11 @@ void ggNtuplizer::analyze(const edm::Event& e, const edm::EventSetup& es) {
   hEvents_->Fill(1.5);
   
   tree_->Fill();
-  std::cout << "DEBUG: Tree filled successfully" << std::endl;
  
 }
 
 void ggNtuplizer::endJob() {
-
-  std::cout<<"EndJob ggNtuplizer"<<std::endl;
+  
     // Clean up JEC corrector objects
     if (jecL1FastAK4) delete jecL1FastAK4;
     if (jecL2RelativeAK4) delete jecL2RelativeAK4;
