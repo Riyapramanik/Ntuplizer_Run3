@@ -123,7 +123,6 @@ void ggNtuplizer::branchesGenInfo(TTree* tree, edm::Service<TFileService> &fs) {
   tree->Branch("pthat",         &pthat_);
   tree->Branch("processID",     &processID_);
   tree->Branch("genWeight",     &genWeight_);
-  std::cout << "DEBUG: Basic gen branches OK" << std::endl;
   tree->Branch("genHT",         &genHT_);
   tree->Branch("genPho1",       &genPho1_);
   tree->Branch("genPho2",       &genPho2_);

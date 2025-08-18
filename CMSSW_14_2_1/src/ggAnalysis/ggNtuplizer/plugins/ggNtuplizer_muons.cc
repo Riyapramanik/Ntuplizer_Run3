@@ -134,7 +134,6 @@ void ggNtuplizer::fillMuons(const edm::Event& e, math::XYZPoint& pv, reco::Verte
   e.getByToken(pckPFCandidateCollection_, pfcands);
 
   if (muonHandle.isValid()) {
-std::cout<<"*****************Started Muon***********************"<<std::endl;
   if(store_muons){
   for (edm::View<pat::Muon>::const_iterator iMu = muonHandle->begin(); iMu != muonHandle->end(); ++iMu) {
    
@@ -241,7 +240,5 @@ std::cout<<"*****************Started Muon***********************"<<std::endl;
   }
 
   }
-
-  std::cout<<"*****************End Muon***********************"<<std::endl;
   
 }

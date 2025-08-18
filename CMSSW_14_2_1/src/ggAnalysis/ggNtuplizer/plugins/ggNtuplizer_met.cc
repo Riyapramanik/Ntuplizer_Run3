@@ -112,8 +112,6 @@ void ggNtuplizer::fillMET(const edm::Event& e, const edm::EventSetup& es) {
   e.getByToken(tok_mets_,pfmet_) ;
   
   if(pfmet_.isValid()){
-
-    std::cout<<"*****************Begin Met***********************"<<std::endl;
     
     const pat::MET &met = pfmet_->front();
     
@@ -200,5 +198,4 @@ void ggNtuplizer::fillMET(const edm::Event& e, const edm::EventSetup& es) {
   // End of MET filters //
   }//(METFilterResults.isValid())
 
-std::cout<<"*****************End Met***********************"<<std::endl;
 }

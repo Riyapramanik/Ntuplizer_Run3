@@ -12,6 +12,22 @@ from PhysicsTools.PatAlgos.slimming.metFilterPaths_cff import *
 
 process = cms.Process('ggKit')
 
+#!!!!!!!!!!!!!!!!!!!!!!!!
+#VarParsing
+import argparse
+argParser = argparse.ArgumentParser(description = "Argument parser")
+argParser.add_argument('--IsRun3', action='store_true', help="Is Run3? Default:NO")
+argParser.add_argument('--YEAR', action='store', default='2023', type=str, help="Which year? Options: 2022, 2022EE, 2023, 2023BPiX")
+argParser.add_argument('--ERA', action='store', default='C', type=str, help="Which era?")
+argParser.add_argument('--IsDATA', action='store_true', help="Is it DATA? Default:NO")
+args = argParser.parse_args()
+
+# Use the parsed options:
+IsDATA = args.IsDATA
+IsMC = not IsDATA
+IsRun3 = args.IsRun3
+YEAR = args.YEAR   
+ERA = args.ERA 
 
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 #! Conditions
@@ -34,10 +50,7 @@ process.load("Geometry.CaloEventSetup.CaloTopology_cfi");
 #Tags for diff year
 #!!!!!!!!!!!!!!!!!!!!!!
 from RecoJets.Configuration.GenJetParticles_cff import *
-#take this from argument
-IsDATA = True
-YEAR = "2022"
-ERA = "C"
+
 
 if IsDATA:
     if YEAR=="2022":
@@ -97,10 +110,11 @@ else:
 #!!!!!!!!!!!!!!
 #! Can make it as argument
 #!!!!!!!!!!!!!!
-process.GlobalTag = GlobalTag(process.GlobalTag, '130X_dataRun3_v2')
+process.GlobalTag = GlobalTag(process.GlobalTag, '130X_dataRun3_PromptAnalysis_v1')
 process.maxEvents = cms.untracked.PSet(input=cms.untracked.int32(-1))
 process.MessageLogger.cerr.FwkReport.reportEvery = 5000
-process.source = cms.Source("PoolSource", fileNames = cms.untracked.vstring('/store/data/Run2022C/EGamma/MINIAOD/22Sep2023-v1/50000/6015928f-0763-4e7f-9d48-ff0f2ddaf12e.root'))
+#process.source = cms.Source("PoolSource", fileNames = cms.untracked.vstring('/store/data/Run2023C/EGamma0/MINIAOD/22Sep2023_v1-v1/2530000/0180e051-34b5-47a0-a851-665aa47846fd.root'))
+process.source = cms.Source("PoolSource", fileNames = cms.untracked.vstring('/store/data/Run2023C/EGamma0/MINIAOD/22Sep2023_v1-v1/2530000/648c5149-33b7-4900-8b18-8f316eb2b64f.root'))
 #process.source = cms.Source("PoolSource", fileNames = cms.untracked.vstring('/store/mc/Run3Summer22EEMiniAODv4/ZGto2NuG-1Jets_PTG-100to200_TuneCP5_13p6TeV_amcatnloFXFX-pythia8/MINIAODSIM/130X_mcRun3_2022_realistic_postEE_v6-v3/2560000/0adadef6-3fb4-453d-ae24-6bc79b4338cb.root'))
 print(process.source)
 
@@ -112,7 +126,7 @@ process.load("PhysicsTools.PatAlgos.triggerLayer1.triggerProducer_cff" )
 process.load("PhysicsTools.PatAlgos.selectionLayer1.selectedPatCandidates_cff")
 
 #output root file
-process.TFileService = cms.Service("TFileService", fileName=cms.string("data.root"))
+process.TFileService = cms.Service("TFileService", fileName=cms.string("ntupls.root"))
 
 #!!!!!!!!!!!!!!!!!!!!!!!!
 #PAT Sequences Loading
@@ -189,7 +203,7 @@ makePuppiesFromMiniAOD( process, True )
 runMetCorAndUncFromMiniAOD(process,
                            isData=IsDATA,
                            metType="Puppi",
-                           postfix="Puppi",
+                           postfix="Updated",
                            jetFlavor="AK4PFPuppi",
                            )
 process.puppi.useExistingWeights = True
@@ -300,9 +314,9 @@ process.ggNtuplizer.PtSFFileAK4 = cms.string('JERfiles/'+JER_tag+'/'+JER_tag+'_S
 process.ggNtuplizer.JetVetoMap = cms.string('JetVetoMaps/'+JetVeto_tag+'.root')
 
 process.ggNtuplizer.UltraLegacy = cms.untracked.bool(False)
-process.ggNtuplizer.isRun3 = cms.untracked.bool(True)
-process.ggNtuplizer.doGenParticles = cms.bool(False)
-process.ggNtuplizer.isData = cms.bool(True)
+process.ggNtuplizer.isRun3 = cms.untracked.bool(IsRun3)
+process.ggNtuplizer.doGenParticles = cms.bool(IsMC)
+process.ggNtuplizer.isData = cms.bool(IsDATA)
 process.ggNtuplizer.store_electrons = cms.untracked.bool(True)
 process.ggNtuplizer.store_muons = cms.untracked.bool(True)  
 process.ggNtuplizer.store_photons = cms.untracked.bool(True)  
@@ -311,20 +325,15 @@ process.ggNtuplizer.store_CHS_met = cms.untracked.bool(True)
 process.ggNtuplizer.store_PUPPI_met = cms.untracked.bool(True)
 process.ggNtuplizer.applyEGMCorrections = cms.bool(True)
 
-process.edTask = cms.Task()
-for key in process.__dict__.keys():
-    if(type(getattr(process,key)).__name__=='EDProducer' or type(getattr(process,key)).__name__=='EDFilter'):
-        process.edTask.add(getattr(process,key))
-
 process.p = cms.Path(
     process.egmPhotonIDSequence 
     *process.allMetFilterPaths              # NEEDED for MET filter flags
     *process.egmGsfElectronIDSequence       # NEEDED for electron ID
     *process.electronMVAValueMapProducer
     *process.slimmedMuonsUpdated            # NEEDED for updated muons
-    *process.qgtagger                       # ADD THIS
-    *process.pileupJetID                    # ADD THIS
-    *process.slimmedJetsPuppiWithInfo       # ADD THIS
+    *process.qgtagger                 
+    *process.pileupJetID                  
+    *process.slimmedJetsPuppiWithInfo 
     *process.ggNtuplizer
 )
 

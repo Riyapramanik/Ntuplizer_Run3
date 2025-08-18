@@ -23,7 +23,8 @@ void EGMCorrectionManager::initializeCorrections() {
 
 std::string EGMCorrectionManager::getElectronJSONFile() {
 
-  std::string basePath = "/eos/user/r/rpramani/run3_ntuplizer/CMSSW_14_2_1/src/ggAnalysis/ggNtuplizer/test/ElectronJson/";
+  //std::string basePath = "/eos/user/r/rpramani/run3_ntuplizer/CMSSW_14_2_1/src/ggAnalysis/ggNtuplizer/test/ElectronJson/";
+  std::string basePath = "ElectronJson/";
   if (year_ == 2022){
     if (period_ == "B" || period_ == "C" || period_ == "D"){
       return basePath + "electronSS_EtDependent_22_BCD.json";
@@ -46,7 +47,8 @@ std::string EGMCorrectionManager::getElectronJSONFile() {
 
 
 std::string EGMCorrectionManager::getPhotonJSONFile() {
-    std::string basePath = "/eos/user/r/rpramani/run3_ntuplizer/CMSSW_14_2_1/src/ggAnalysis/ggNtuplizer/test/PhotonJson/";
+  //std::string basePath = "/eos/user/r/rpramani/run3_ntuplizer/CMSSW_14_2_1/src/ggAnalysis/ggNtuplizer/test/PhotonJson/";
+  std::string basePath = "PhotonJson/";
     
     if (year_ == 2022) {
         if (period_ == "B" || period_ == "C" || period_ == "D" || 

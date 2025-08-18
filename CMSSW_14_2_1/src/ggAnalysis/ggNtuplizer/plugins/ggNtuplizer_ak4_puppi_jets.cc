@@ -403,7 +403,6 @@ void ggNtuplizer::fillAK4PUPPIJets(const edm::Event& e, const edm::EventSetup& e
 	if(pfjetAK4s.isValid() && store_ak4jets){
 	  for (edm::View<pat::Jet>::const_iterator iJet = pfjetAK4s->begin(); iJet != pfjetAK4s->end(); ++iJet) {
 	    const pat::Jet &ak4jet = *iJet;
-	    std::cout<<"*****************Started Jets***********************"<<std::endl;
 	    //Rho                                                                                                                                            
         edm::Handle<double> Rho_PF;
         e.getByToken(tok_Rho_,Rho_PF);
@@ -595,7 +594,6 @@ void ggNtuplizer::fillAK4PUPPIJets(const edm::Event& e, const edm::EventSetup& e
   
 	}
 
-	std::cout<<"*****************End Jets***********************"<<std::endl;
 }
 
 

@@ -292,8 +292,6 @@ void ggNtuplizer::fillPhotons(const edm::Event& e, const edm::EventSetup& es) {
   e.getByToken(photonCollection_, photonHandle);
 
   if (photonHandle.isValid()) {
-
-    std::cout<<"*****************Started Photon***********************"<<std::endl;
     
   //edm::Handle<reco::PhotonCollection> recoPhotonHandle;
   //e.getByToken(recophotonCollection_, recoPhotonHandle);
@@ -464,7 +462,6 @@ void ggNtuplizer::fillPhotons(const edm::Event& e, const edm::EventSetup& es) {
   }
   }
   }
-  std::cout<<"*****************End Photon***********************"<<std::endl;
 
 }
 

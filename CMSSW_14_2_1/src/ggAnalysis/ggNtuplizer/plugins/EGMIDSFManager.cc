@@ -25,7 +25,8 @@ void EGMIDSFManager::initializeCorrections() {
 
 std::string EGMIDSFManager::getElectronIDJSONFile() {
   
-  std::string basePath = "/eos/user/r/rpramani/run3_ntuplizer/CMSSW_14_2_1/src/ggAnalysis/ggNtuplizer/test/ElectronJson/";
+  //std::string basePath = "/eos/user/r/rpramani/run3_ntuplizer/CMSSW_14_2_1/src/ggAnalysis/ggNtuplizer/test/ElectronJson/";
+  std::string basePath = "ElectronJson/";
 
   if (year_ == 2022) {
         if (period_ == "B" || period_ == "C" || period_ == "D") {
@@ -49,7 +50,8 @@ std::string EGMIDSFManager::getElectronIDJSONFile() {
 
 
 std::string EGMIDSFManager::getPhotonIDJSONFile() {
-    std::string basePath = "/eos/user/r/rpramani/run3_ntuplizer/CMSSW_14_2_1/src/ggAnalysis/ggNtuplizer/test/PhotonJson/";
+  //std::string basePath = "/eos/user/r/rpramani/run3_ntuplizer/CMSSW_14_2_1/src/ggAnalysis/ggNtuplizer/test/PhotonJson/";
+  std::string basePath = "PhotonJson/";
     
     if (year_ == 2022) {
         if (period_ == "B" || period_ == "C" || period_ == "D") {

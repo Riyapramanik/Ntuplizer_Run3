@@ -299,7 +299,6 @@ void ggNtuplizer::branchesGlobalEvent(TTree* tree) {
 }
 
 void ggNtuplizer::fillGlobalEvent(const edm::Event& e, const edm::EventSetup& es) {
-  std::cout<<"***********************globalEvent*****************"<<std::endl;
 
   run_    = e.id().run();
   event_  = e.id().event();
