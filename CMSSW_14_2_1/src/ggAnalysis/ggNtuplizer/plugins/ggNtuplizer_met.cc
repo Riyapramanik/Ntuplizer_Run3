@@ -24,7 +24,7 @@ using namespace std;
   bool Flag_BadPFMuonDzFilter_;
   bool Flag_hfNoisyHitsFilter_;
   bool Flag_eeBadScFilter_;
-  bool Flag_ecalBadCalibFilter_;
+//bool Flag_ecalBadCalibFilter_;
 
 float miset , misphi , sumEt, misetsig;
 float miset_covXX, miset_covXY, miset_covYY;
@@ -45,7 +45,7 @@ void ggNtuplizer::branchesMET(TTree* tree) {
   tree->Branch("Flag_BadPFMuonDzFilter",&Flag_BadPFMuonDzFilter_,"Flag_BadPFMuonDzFilter_/O");
   tree->Branch("Flag_hfNoisyHitsFilter",&Flag_hfNoisyHitsFilter_,"Flag_hfNoisyHitsFilter_/O");
   tree->Branch("Flag_eeBadScFilter",&Flag_eeBadScFilter_,"Flag_eeBadScFilter_/O");
-  tree->Branch("Flag_ecalBadCalibFilter",&Flag_ecalBadCalibFilter_,"Flag_ecalBadCalibFilter_/O");
+  //tree->Branch("Flag_ecalBadCalibFilter",&Flag_ecalBadCalibFilter_,"Flag_ecalBadCalibFilter_/O");
   
 if(store_CHS_met){
   
@@ -93,7 +93,6 @@ if(store_CHS_met){
 }
 
 void ggNtuplizer::fillMET(const edm::Event& e, const edm::EventSetup& es) {
-  
   //Initialize MET filter flags
   Flag_goodVertices_ = false;
   Flag_globalSuperTightHalo2016Filter_ = false;
@@ -102,8 +101,7 @@ void ggNtuplizer::fillMET(const edm::Event& e, const edm::EventSetup& es) {
   Flag_BadPFMuonDzFilter_ = false;
   Flag_hfNoisyHitsFilter_ = false;
   Flag_eeBadScFilter_ = false;
-  Flag_ecalBadCalibFilter_ = false;
-  
+  //Flag_ecalBadCalibFilter_ = false;
 // MET uncertainty ids are taken from: https://github.com/cms-sw/cmssw/blob/CMSSW_8_0_X/DataFormats/PatCandidates/interface/MET.h#L152-L158 //
   
   // CHS MET //
@@ -119,6 +117,8 @@ void ggNtuplizer::fillMET(const edm::Event& e, const edm::EventSetup& es) {
     misphi = met.corPhi();//met.phi();
     misetsig = met.metSignificance();
     sumEt = met.corSumEt();//sumEt();
+
+    if(sumEt<30){return;}
             
     miset_covXX = met.getSignificanceMatrix().At(0,0);
     miset_covXY = met.getSignificanceMatrix().At(0,1);
@@ -150,7 +150,9 @@ void ggNtuplizer::fillMET(const edm::Event& e, const edm::EventSetup& es) {
     misphi_PUPPI = met.corPhi();
     misetsig_PUPPI = met.metSignificance();
     sumEt_PUPPI = met.corSumEt();
-        
+
+    if(sumEt_PUPPI<30){return;}
+    
     miset_PUPPI_covXX = met.getSignificanceMatrix().At(0,0);
     miset_PUPPI_covXY = met.getSignificanceMatrix().At(0,1);
     miset_PUPPI_covYY = met.getSignificanceMatrix().At(1,1);
@@ -180,22 +182,24 @@ void ggNtuplizer::fillMET(const edm::Event& e, const edm::EventSetup& es) {
   //MET Filter
   edm::Handle<edm::TriggerResults> METFilterResults;
   e.getByToken(tok_METfilters_, METFilterResults);
+  
   if(METFilterResults.isValid()){
     const edm::TriggerNames & metfilterName = e.triggerNames(*METFilterResults);
-    
+    //const std::vector<std::string>& names = metfilterName.triggerNames();
+        
     //Flag_goodVertices
     unsigned int goodVerticesIndex_ = metfilterName.triggerIndex("Flag_goodVertices");
     Flag_goodVertices_ = METFilterResults.product()->accept(goodVerticesIndex_);
-  
-  Flag_globalSuperTightHalo2016Filter_ = METFilterResults.product()->accept(metfilterName.triggerIndex("Flag_globalSuperTightHalo2016Filter"));
-  //Flag_EcalDeadCellTriggerPrimitiveFilter_ = METFilterResults.product()->accept(metfilterName.triggerIndex("Flag_EcalDeadCellTriggerPrimitiveFilter"));
-  Flag_BadPFMuonFilter_ = METFilterResults.product()->accept(metfilterName.triggerIndex("Flag_BadPFMuonFilter"));
-  Flag_BadPFMuonDzFilter_ = METFilterResults.product()->accept(metfilterName.triggerIndex("Flag_BadPFMuonDzFilter"));
-  //Flag_hfNoisyHitsFilter_ = METFilterResults.product()->accept(metfilterName.triggerIndex("Flag_hfNoisyHitsFilter"));
-  //Flag_eeBadScFilter_ = METFilterResults.product()->accept(metfilterName.triggerIndex("Flag_eeBadScFilter"));
-  //Flag_ecalBadCalibFilter_ = METFilterResults.product()->accept(metfilterName.triggerIndex("Flag_ecalBadCalibFilter"));
+    Flag_globalSuperTightHalo2016Filter_ = METFilterResults.product()->accept(metfilterName.triggerIndex("Flag_globalSuperTightHalo2016Filter"));
+    Flag_EcalDeadCellTriggerPrimitiveFilter_ = METFilterResults.product()->accept(metfilterName.triggerIndex("Flag_EcalDeadCellTriggerPrimitiveFilter"));
+    Flag_BadPFMuonFilter_ = METFilterResults.product()->accept(metfilterName.triggerIndex("Flag_BadPFMuonFilter"));
+    Flag_BadPFMuonDzFilter_ = METFilterResults.product()->accept(metfilterName.triggerIndex("Flag_BadPFMuonDzFilter"));
+    Flag_hfNoisyHitsFilter_ = METFilterResults.product()->accept(metfilterName.triggerIndex("Flag_hfNoisyHitsFilter"));
+    Flag_eeBadScFilter_ = METFilterResults.product()->accept(metfilterName.triggerIndex("Flag_eeBadScFilter"));
+  //Flag_ecalBadCalibFilter_ = METFilterResults.product()->accept(metfilterName.triggerIndex("Flag_ecalBadCalibFilter")); // Not applicable for 2022 and 2023
 
   // End of MET filters //
   }//(METFilterResults.isValid())
+
 
 }

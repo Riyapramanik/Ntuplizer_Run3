@@ -10,7 +10,8 @@ from PhysicsTools.PatAlgos.patTemplate_cfg import *
 from PhysicsTools.PatAlgos.tools.jetTools import *
 from PhysicsTools.PatAlgos.slimming.metFilterPaths_cff import *
 
-process = cms.Process('ggKit')
+#process = cms.Process('ggKit')
+process = cms.Process("Combined")
 
 #!!!!!!!!!!!!!!!!!!!!!!!!
 #VarParsing
@@ -35,16 +36,36 @@ ERA = args.ERA
 
 process.load("FWCore.MessageLogger.MessageLogger_cfi")
 process.options = cms.untracked.PSet(allowUnscheduled=cms.untracked.bool(True))
-process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
+#process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 process.load('Configuration.StandardSequences.Services_cff')
 process.load('SimGeneral.MixingModule.mixNoPU_cfi')
 process.load("Configuration.EventContent.EventContent_cff")
-#process.load('Configuration.StandardSequences.GeometryRecoDB_cff')
-process.load('Configuration.StandardSequences.MagneticField_cff')
-process.load('Configuration.StandardSequences.GeometryExtended_cff')
-process.load("Geometry.CaloEventSetup.CaloGeometry_cfi");
-process.load("Geometry.CaloEventSetup.CaloTopology_cfi");
 
+process.load('Configuration.Geometry.GeometryRecoDB_cff')
+process.load("Configuration.StandardSequences.MagneticField_cff")
+process.load("Configuration.StandardSequences.GeometryRecoDB_cff")
+process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
+process.load("RecoEcal.EgammaCoreTools.EcalNextToDeadChannelESProducer_cff")
+
+process.CaloGeometryBuilder = cms.ESProducer("CaloGeometryBuilder",
+    SelectedCalos = cms.vstring(
+        'HCAL', 
+        'ZDC', 
+        'EcalBarrel', 
+        'EcalEndcap', 
+        'EcalPreshower', 
+        'TOWER'
+        # Note: 'CASTOR' is intentionally excluded
+    )
+)
+
+
+process.load('RecoJets.Configuration.GenJetParticles_cff')
+process.load('RecoJets.Configuration.RecoGenJets_cff')
+process.load('RecoJets.JetProducers.TrackJetParameters_cfi')
+process.load('RecoJets.JetProducers.PileupJetIDParams_cfi')
+process.load("PhysicsTools.PatAlgos.producersLayer1.patCandidates_cff")
+process.load("PhysicsTools.PatAlgos.selectionLayer1.selectedPatCandidates_cff")
 
 #!!!!!!!!!!!!!!!!!!!!!!
 #Tags for diff year
@@ -111,11 +132,12 @@ else:
 #! Can make it as argument
 #!!!!!!!!!!!!!!
 process.GlobalTag = GlobalTag(process.GlobalTag, '130X_dataRun3_PromptAnalysis_v1')
+#process.GlobalTag = GlobalTag(process.GlobalTag, '130X_mcRun3_2023_realistic_v14')
 process.maxEvents = cms.untracked.PSet(input=cms.untracked.int32(-1))
 process.MessageLogger.cerr.FwkReport.reportEvery = 5000
 #process.source = cms.Source("PoolSource", fileNames = cms.untracked.vstring('/store/data/Run2023C/EGamma0/MINIAOD/22Sep2023_v1-v1/2530000/0180e051-34b5-47a0-a851-665aa47846fd.root'))
 process.source = cms.Source("PoolSource", fileNames = cms.untracked.vstring('/store/data/Run2023C/EGamma0/MINIAOD/22Sep2023_v1-v1/2530000/648c5149-33b7-4900-8b18-8f316eb2b64f.root'))
-#process.source = cms.Source("PoolSource", fileNames = cms.untracked.vstring('/store/mc/Run3Summer22EEMiniAODv4/ZGto2NuG-1Jets_PTG-100to200_TuneCP5_13p6TeV_amcatnloFXFX-pythia8/MINIAODSIM/130X_mcRun3_2022_realistic_postEE_v6-v3/2560000/0adadef6-3fb4-453d-ae24-6bc79b4338cb.root'))
+#process.source = cms.Source("PoolSource", fileNames = cms.untracked.vstring('/store/mc/Run3Summer23MiniAODv4/ZGto2NuG-1Jets_PTG-100to200_TuneCP5_13p6TeV_amcatnloFXFX-pythia8/MINIAODSIM/130X_mcRun3_2023_realistic_v14-v3/30000/02bc6fcd-c746-41a5-bfef-c19939c5474a.root'))
 print(process.source)
 
 #!!!!!!!!!!!!!!
@@ -234,34 +256,6 @@ else:
     year_int = 2022
 period_str = ERA
 
-#===== MET Filters ==
-process.load('RecoMET.METFilters.primaryVertexFilter_cfi')
-process.primaryVertexFilter.vertexCollection = cms.InputTag("offlineSlimmedPrimaryVertices")
-process.load('RecoMET.METFilters.globalSuperTightHalo2016Filter_cfi')
-process.load('RecoMET.METFilters.BadPFMuonFilter_cfi')
-process.BadPFMuonFilter.muons = cms.InputTag("slimmedMuons")
-process.BadPFMuonFilter.PFCandidates = cms.InputTag("packedPFCandidates")
-process.BadPFMuonFilter.vtx = cms.InputTag("offlineSlimmedPrimaryVertices")
-process.BadPFMuonFilter.taggingMode = cms.bool(True)
-process.load('RecoMET.METFilters.BadPFMuonDzFilter_cfi')
-process.BadPFMuonDzFilter.muons = cms.InputTag("slimmedMuons")
-process.BadPFMuonDzFilter.PFCandidates = cms.InputTag("packedPFCandidates")
-process.BadPFMuonDzFilter.vtx = cms.InputTag("offlineSlimmedPrimaryVertices")
-process.BadPFMuonDzFilter.taggingMode = cms.bool(True)
-process.load('RecoMET.METFilters.eeBadScFilter_cfi')
-process.load('RecoMET.METFilters.ecalBadCalibFilter_cfi')
-process.load('RecoMET.METFilters.hfNoisyHitsFilter_cfi')
-process.allMetFilterPaths = cms.Sequence(
-    process.primaryVertexFilter *
-    process.globalSuperTightHalo2016Filter *
-    process.BadPFMuonFilter *
-    process.BadPFMuonDzFilter #*
-#    process.eeBadScFilter *
-#    process.ecalBadCalibFilter *
-#    process.hfNoisyHitsFilter
-)
-#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
 #!!!!!!!!!!!!!!!!!!!!!!!!!
 #Analyser!!!!!!!!!
 #!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -300,6 +294,7 @@ process.ggNtuplizer.bits = cms.InputTag("TriggerResults","","HLT")
 process.ggNtuplizer.TriggerObjects = cms.InputTag("slimmedPatTrigger")
 process.ggNtuplizer.prescales = cms.InputTag("patTrigger","","RECO") 
 process.ggNtuplizer.MET_Filters = cms.InputTag("TriggerResults","","RECO") # For 2024 data
+#process.ggNtuplizer.MET_Filters = cms.InputTag("TriggerResults","","PAT")
 
 #JER and JEC Files                                                                                                         
 process.ggNtuplizer.jecL1FastFileAK4          = cms.string('JECfiles/'+JEC_tag+'/'+JEC_tag+'_L1FastJet_AK4PFPuppi.txt')
@@ -327,7 +322,7 @@ process.ggNtuplizer.applyEGMCorrections = cms.bool(True)
 
 process.p = cms.Path(
     process.egmPhotonIDSequence 
-    *process.allMetFilterPaths              # NEEDED for MET filter flags
+    #*process.allMetFilterPaths              # NEEDED for MET filter flags
     *process.egmGsfElectronIDSequence       # NEEDED for electron ID
     *process.electronMVAValueMapProducer
     *process.slimmedMuonsUpdated            # NEEDED for updated muons

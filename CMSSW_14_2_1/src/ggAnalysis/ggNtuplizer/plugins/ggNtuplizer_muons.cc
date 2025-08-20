@@ -136,7 +136,7 @@ void ggNtuplizer::fillMuons(const edm::Event& e, math::XYZPoint& pv, reco::Verte
   if (muonHandle.isValid()) {
   if(store_muons){
   for (edm::View<pat::Muon>::const_iterator iMu = muonHandle->begin(); iMu != muonHandle->end(); ++iMu) {
-   
+    if (iMu->pt() <= 10.0) continue;
     muPt_    .push_back(iMu->pt());
     muEn_    .push_back(iMu->energy());
     muEta_   .push_back(iMu->eta());

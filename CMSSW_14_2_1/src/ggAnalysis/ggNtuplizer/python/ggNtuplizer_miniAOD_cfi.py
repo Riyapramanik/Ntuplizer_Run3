@@ -78,7 +78,7 @@ ggNtuplizer = cms.EDAnalyzer("ggNtuplizer",
                              isData = cms.bool(True),
                              applyEGMCorrections = cms.bool(False),
 
-                             YEAR = cms.untracked.string("2022"),
+                             YEAR = cms.untracked.string("2023"),
                              Data = cms.untracked.bool(True),
                              MonteCarlo = cms.untracked.bool(False),
                              UltraLegacy = cms.untracked.bool(False),

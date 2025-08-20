@@ -154,7 +154,6 @@ class ggNtuplizer : public edm::one::EDAnalyzer<edm::one::SharedResources> {
   bool store_electrons, store_muons, store_photons, store_ak4jets, store_CHS_met, store_PUPPI_met;
 
   edm::EDGetTokenT<pat::TriggerObjectStandAloneCollection> triggerObjects_;
-  edm::EDGetTokenT<pat::PackedTriggerPrescales> triggerPrescales_;
   std::unique_ptr<EGMCorrectionManager> egmCorrectionManager_;
   // ID Scale Factor Manager
   std::unique_ptr<EGMIDSFManager> egmIDSFManager_;

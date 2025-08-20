@@ -468,7 +468,6 @@ void ggNtuplizer::fillAK4PUPPIJets(const edm::Event& e, const edm::EventSetup& e
 	static const int njetmx = 10;
 	static const int nsrc = 24;
 	const int njecmcmx = 2*nsrc + 1 ;
-
 	for (int isrc = 0; isrc < njecmcmx; ++isrc) {
 	  double sup = 1.0;
 	  JetCorrectionUncertainty* jecUnc = nullptr;
@@ -477,7 +476,6 @@ void ggNtuplizer::fillAK4PUPPIJets(const edm::Event& e, const edm::EventSetup& e
 	    jecUnc->setJetEta(pfjetAK4_4v_jecor.Eta());
 	    jecUnc->setJetPt(pfjetAK4_4v_jecor.Pt());
 	    sup += jecUnc->getUncertainty(true);
-	    
 	    switch (isrc) {
             case 1:  jesup_AbsoluteStat_.push_back(sup); break;
             case 2:  jesup_AbsoluteScale_.push_back(sup); break;
@@ -571,7 +569,6 @@ void ggNtuplizer::fillAK4PUPPIJets(const edm::Event& e, const edm::EventSetup& e
     std::sort(daughters.begin(), daughters.end(), [](const reco::CandidatePtr &a, const reco::CandidatePtr &b) {
       return a->pt() > b->pt();
  });
-    
     float sumptchg_kp3 = 0, sumptchg_kp6 = 0, sumptchg_k1 = 0, chg_ptsum = 0;
     for (const auto &cand : daughters) {
       sumptchg_kp3 += pow(cand->pt(), 0.3) * cand->charge();

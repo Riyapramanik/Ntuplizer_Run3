@@ -82,7 +82,6 @@ ggNtuplizer::ggNtuplizer(const edm::ParameterSet& ps) :
   isData_ = ps.getParameter<bool>("isData");
   triggerBits_ = consumes<edm::TriggerResults> ( ps.getParameter<edm::InputTag>("bits"));
   triggerObjects_ = consumes<pat::TriggerObjectStandAloneCollection>(ps.getParameter<edm::InputTag>("TriggerObjects"));
-  triggerPrescales_ = consumes<pat::PackedTriggerPrescales>(ps.getParameter<edm::InputTag>("prescales"));
   
   //JEC and JER Files
 

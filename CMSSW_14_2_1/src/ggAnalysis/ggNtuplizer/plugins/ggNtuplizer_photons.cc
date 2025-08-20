@@ -7,7 +7,7 @@
 using namespace std;
 Int_t          nPho_;
 vector<float>  phoE_;
-vector<float>  phoEt_;
+vector<float>  phoPt_;
 vector<float>  phoEta_;
 vector<float>  phoPhi_;
 vector<float>  phoSCE_;
@@ -107,7 +107,7 @@ bool isInFootprint(const T& thefootprint, const U& theCandidate) {
 void ggNtuplizer::branchesPhotons(TTree* tree) {
   tree->Branch("nPho",                    &nPho_);
   tree->Branch("phoE",                    &phoE_);
-  tree->Branch("phoEt",                   &phoEt_);
+  tree->Branch("phoPt",                   &phoPt_);
   tree->Branch("phoEta",                  &phoEta_);
   tree->Branch("phoPhi",                  &phoPhi_);
   tree->Branch("phoSCE",                  &phoSCE_);
@@ -199,7 +199,7 @@ void ggNtuplizer::fillPhotons(const edm::Event& e, const edm::EventSetup& es) {
 
   // cleanup from previous execution
   phoE_                   .clear();
-  phoEt_                  .clear();
+  phoPt_                  .clear();
   phoEta_                 .clear();
   phoPhi_                 .clear();
   phoSCE_                 .clear();
@@ -308,9 +308,9 @@ void ggNtuplizer::fillPhotons(const edm::Event& e, const edm::EventSetup& es) {
   noZS::EcalClusterLazyTools lazyToolnoZS(e, ecalClusterToolsESGetTokens_.get(es), ebReducedRecHitCollection_, eeReducedRecHitCollection_, esReducedRecHitCollection_);
   if(store_photons){
   for (edm::View<pat::Photon>::const_iterator iPho = photonHandle->begin(); iPho != photonHandle->end(); ++iPho) {
-
+    if (iPho->pt() <= 50.0) continue; //remove that phototn in event which satisfy this condition
     phoE_             .push_back(iPho->energy());
-    phoEt_            .push_back(iPho->et());
+    phoPt_            .push_back(iPho->pt());
     phoEta_           .push_back(iPho->eta());
     phoPhi_           .push_back(iPho->phi());
     phoSCE_           .push_back((*iPho).superCluster()->energy());
